@@ -44,6 +44,7 @@ context "init" do
 		@p2.login = "jgoin"
 		@p2.passwd = "pass1"
 		@p2.valid?
+                puts @p2.errors.messages
 		@p2.errors.messages[:login].include?("has already been taken").should be_true
 		#Person.all.each{|p| p.destroy}
 		@p1.destroy

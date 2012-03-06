@@ -7,8 +7,8 @@
 
 <h1>Portail d'inscription</h1>
 
-<%= error %>
-
+<%= errlog %>
+<%= errpass %>
 
 
 <form action="/sauth/register" method="post">

@@ -7,10 +7,6 @@
 
 <h1>Portail d'inscription</h1>
 
-<%= error %>
-
-
-
 <form action="/sauth/register" method="post">
   <div class="field">
     <label for="session_login">Login</label><br />
