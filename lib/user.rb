@@ -6,11 +6,14 @@ class User < ActiveRecord::Base
   validates :login, :presence => true
   validates :login, :uniqueness => true
   validates :passwd, :presence => true
+   
 
 
   def passwd=(passwd)
-    unless passwd.nil?
+    if !passwd.empty?
     self[:passwd] = User.encrypt_password(passwd)
+    else
+    self[:passwd] = nil
   end
 end
 
