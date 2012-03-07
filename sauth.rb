@@ -1,7 +1,7 @@
 require 'sinatra'
 $: << File.dirname(__FILE__)
 require 'middleware/my_middleware'
-require 'lib/person'
+require 'lib/user'
 require 'spec/spec_helper'
 
 use RackCookieSession
@@ -47,16 +47,16 @@ post'/sauth/register' do
         #else
           #On peut le login et le mdp dans la bdd
           #puts "4"
-        p=Person.new()
-	p.login = params[:login]
-        p.passwd = params[:passwd]
-        p.save
+        u=User.new()
+	u.login = params[:login]
+        u.passwd = params[:passwd]
+        u.save
         
-        if p.valid?
+        if u.valid?
           redirect '/sauth/registerok'
         else
-          errlog = p.errors.messages[:login]
-          errpass = p.errors.messages[:pass]
+          errlog = u.errors.messages[:login]
+          errpass = u.errors.messages[:pass]
           if errlog.nil?
           redirect "/sauth/register?error=Veuillez_entrer_un_mot_de_passe"
           elsif errlog.include?("has already been taken")

@@ -1,12 +1,12 @@
 class AddLoginPasswd < ActiveRecord::Migration
   def up
-    add_column :people, :login, :string
-    add_column :people, :passwd, :string
+    add_column :users, :login, :string
+    add_column :users, :passwd, :string
   end
 
   def down
-    remove_column :people, :login
-    remove_column :people, :passwd
+    remove_column :users, :login
+    remove_column :users, :passwd
     
   end
 end
