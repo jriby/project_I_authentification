@@ -12,27 +12,53 @@ before(:each) do
 end
 
 context "init" do
+
+  describe "With info missing" do
+
 	it "should not be valid without a login" do
 				
-		@u.login = "jriby"	
+		@u.login = "jriby"
+                @u.is_su = false	
 		@u.should_not be_valid
 	end
 	
 	it "should not be valid without a passwd" do
 
-		@u.passwd = "pass"			
+		@u.passwd = "pass"
+                @u.is_su = false			
 		@u.should_not be_valid
 	end
 
-	it "should be valid with a login and a passwd" do
+	it "should be valid with a login a passwd and is_su" do
+
+		@u.login = "jfunt"
+		@u.passwd = "pass"
+                @u.is_su = false
+		@u.should be_valid
+
+	end
+
+  end
+
+  describe "With info not missing" do
+        it "should be valid with a login a passwd and without is_su fixed" do
 
 		@u.login = "jfunt"
 		@u.passwd = "pass"
 		@u.should be_valid
 
 	end
+        
+        it "should set is_su at false if it is not fixed" do
 
+		@u.login = "jfunt"
+		@u.passwd = "pass"
+		@u.is_su.should == false
 
+	end
+  end
+
+  describe "Unicity" do
 	it "should have a login unique" do
 		
 		@u1=User.new()
@@ -49,6 +75,29 @@ context "init" do
 		@u1.destroy
 
 	end
+  end
+
+  describe "Test passwd" do
+
+    before(:each) do
+      @u = User.new
+      @u.login = "jriby"
+    end
+
+    it "Should call the encryption sha1" do
+
+      Digest::SHA1.should_receive(:hexdigest).with("pass").and_return("ok")
+      @u.passwd = "pass"
+      @u.passwd.should == "\"ok\""
+    end
+
+    it "Should encrypt the pass" do
+
+      @u.passwd = "pass"
+      @u.passwd.should == "\"9d4e1e23bd5b727046a9e3b4b7db57bd8d6ee684\""
+    end
+
+  end
 
 end
 
