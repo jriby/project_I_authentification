@@ -3,6 +3,9 @@ require 'digest/sha1'
 
 class User < ActiveRecord::Base
 
+  has_many :utilisations
+  has_many :applications, :through => :utilisations
+
   validates :login, :presence => true
   validates :login, :uniqueness => true
   validates :passwd, :presence => true
