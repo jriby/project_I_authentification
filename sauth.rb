@@ -18,6 +18,9 @@ end
     session["current_user"] = nil
   end
 
+#########################
+# Portail d'inscription
+#########################
 get '/sauth/register' do
 
           erb :"sauth/register"
@@ -25,17 +28,27 @@ get '/sauth/register' do
 end
 
 post'/sauth/register' do
+login = params['login']
+passwd = params['passwd']
+
+
+
+params = { 'user' => {"login" => login, "passwd" => passwd }}
 
   @u = User.create(params['user'])
-
-  if @u
+  
+  if @u.valid?
     redirect "/sauth/session/new"
   else
+    @error = @u.errors.messages
     erb :"sauth/register"
   end
 
 end
 
+#########################
+# Portail de connection
+#########################
 get '/sauth/session/new' do
           
           erb :"/sauth/session/new"
