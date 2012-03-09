@@ -10,8 +10,6 @@ class User < ActiveRecord::Base
   validates :login, :uniqueness => true
   validates :passwd, :presence => true
    
-
-
   def passwd=(passwd)
     if !passwd.empty?
     self[:passwd] = User.encrypt_password(passwd)
@@ -23,6 +21,14 @@ end
   def self.encrypt_password(password)
     Digest::SHA1.hexdigest(password).inspect
   end
+
+  def self.user_is_present(login, password)
+    u = User.find_by_login(login)
+    !u.nil? && u.passwd == User.encrypt_password(password)
+  end
+
+
+
 
 end
 

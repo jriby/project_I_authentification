@@ -79,7 +79,7 @@ context "init" do
 		@u2.passwd = "pass1"
 		@u2.valid?
 		@u2.errors.messages[:login].include?("has already been taken").should be_true
-		#User.all.each{|m| m.destroy}
+		User.all.each{|m| m.destroy}
 		@u1.destroy
 
 	end
@@ -112,13 +112,47 @@ context "init" do
         @params = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
     end
 
-    it "Should create the user" do
-      @user = User.create(@params['user'])
-      @user.should be_valid
-      @user.destroy
+    context "User is valid" do
+      it "Should create the user" do
+        @user = User.create(@params['user'])
+        @user.should be_valid
+        @user.destroy
+      end
+     end
+
+
+    context "User is not valid" do
+      it "Should return false" do
+        @user = User.create(@params['user'])
+        @user.should be_valid
+        @user.destroy
+      end
     end
+
   end
 
+  describe "Test de la methode user_is_present" do
+before do
+        @params = { 'user' => {"login" => "jgoin", "passwd" => "pass" }}
+    end
+
+    it "Should use find_by_login" do
+        User.stub(:find_by_login)
+        User.should_receive(:find_by_login).with('jriby')
+        User.user_is_present('jriby', 'pass')
+    end
+
+    it "Should be valid if the user is present" do
+        @user = User.create(@params['user'])
+        User.user_is_present('jgoin', 'pass').should be_true
+        @user.destroy
+    end
+
+    it "Should not be valid if the user is not present" do
+      User.user_is_present('looool', 'pass').should be_false
+    end
+
+  end
 end
 
 end
