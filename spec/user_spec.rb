@@ -15,16 +15,23 @@ context "init" do
 
   describe "With info missing" do
 
-	it "should not be valid without a login" do
+	it "should not be valid without a passwd" do
 				
 		@u.login = "jriby"
                 @u.is_su = false	
 		@u.should_not be_valid
 	end
 	
-	it "should not be valid without a passwd" do
+	it "should not be valid without a login" do
 
 		@u.passwd = "pass"
+                @u.is_su = false			
+		@u.should_not be_valid
+	end
+
+        it "should not be valid if the passwd is empty" do
+                @u.login = "jriby"
+		@u.passwd = ""
                 @u.is_su = false			
 		@u.should_not be_valid
 	end
@@ -59,6 +66,7 @@ context "init" do
   end
 
   describe "Unicity" do
+
 	it "should have a login unique" do
 		
 		@u1=User.new()
@@ -97,6 +105,18 @@ context "init" do
       @u.passwd.should == "\"9d4e1e23bd5b727046a9e3b4b7db57bd8d6ee684\""
     end
 
+  end
+
+  describe "Test de create" do
+    before do
+        @params = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
+    end
+
+    it "Should create the user" do
+      @user = User.create(@params['user'])
+      @user.should be_valid
+      @user.destroy
+    end
   end
 
 end
