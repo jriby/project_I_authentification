@@ -122,11 +122,34 @@ context "init" do
 
 
     context "User is not valid" do
-      it "Should return false" do
+      it "Should not be valid if the login is empty" do
+        @params['user']["login"] = ""
         @user = User.create(@params['user'])
-        @user.should be_valid
+        @user.should_not be_valid
         @user.destroy
       end
+
+      it "Should not be valid if the pass is empty" do
+        @params['user']["passwd"] = ""
+        @user = User.create(@params['user'])
+        @user.should_not be_valid
+        @user.destroy
+      end
+
+      it "Should not be valid if the pass is nil" do
+        @params['user']["passwd"] = nil
+        @user = User.create(@params['user'])
+        @user.should_not be_valid
+        @user.destroy
+      end
+
+      it "Should not be valid if the login is nil" do
+        @params['user']["login"] = nil
+        @user = User.create(@params['user'])
+        @user.should_not be_valid
+        @user.destroy
+      end
+
     end
 
   end
