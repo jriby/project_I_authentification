@@ -130,25 +130,90 @@ describe "Authenticatin Service" do
       end
 
     end
+end
+
+#########################
+#Connexion Service
+#########################
+describe "Connexion Service" do
+
 #########################
 #get /sauth/session/new
 #########################
     describe "get /sauth/session/new" do
-      it "should get /session/new" do
+      
+      it "should get /sauth/session/new" do
         get '/sauth/session/new'
         last_response.should be_ok
          end
 
-      it "should return a form to post registration info to /sauth/register" do
+      it "should return a form to post registration info to /sauth/session/new" do
         get '/sauth/session/new'
         last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
          end
     end
 
+    describe "post /sauth/session/new" do
+      before do
+        @params = { 'login' => "login", "passwd" => "pass" }
+      
+      end
 
+      it "Should use user is present" do
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("login", "pass")
+        post '/sauth/session/new', @params
+
+
+      end
+
+      it "Should redirect if the log and pass is prensent" do
+
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post '/sauth/session/new', @params
+        last_response.should be_redirect
+      end
+
+      it "Should redirect to the user page if the log and pass is prensent" do
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post '/sauth/session/new', @params
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/index'
+      end
+
+      context "Connexion is not OK" do
+
+      it "Should go to get /sauth/session/new if the log and pass is not prensent" do
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("login", "pass").and_return(false)
+        post '/sauth/session/new', @params
+        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+      end
+
+      it "Should go to get /sauth/session/new if the log is not given" do
+        @params['login']="" 
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("", "pass").and_return(false)
+        post '/sauth/session/new', @params
+        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+      end
+
+      it "Should go to get /sauth/session/new if the pass is not given" do
+        @params['passwd']=""
+        User.stub(:user_is_present)
+        User.should_receive(:user_is_present).with("login", "").and_return(false)
+        post '/sauth/session/new', @params
+        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+      end
+
+      end
+    end
 
   end 
-end
 
+end
 end
 

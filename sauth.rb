@@ -28,10 +28,9 @@ get '/sauth/register' do
 end
 
 post'/sauth/register' do
+
 login = params['login']
 passwd = params['passwd']
-
-
 
 params = { 'user' => {"login" => login, "passwd" => passwd }}
 
@@ -56,10 +55,22 @@ get '/sauth/session/new' do
 end
 
 post '/sauth/session/new' do
-          
-        
+
+  if User.user_is_present(params['login'],params['passwd'])
+    redirect "/index"
+  else        
+    erb :"/sauth/session/new"
+  end
 
 end
 
+get "/index" do
+  erb :"/index"
+end
+
+get'/sessions/deco' do
+   disconnect
+   redirect "/sauth/session/new"
+end
 
 
