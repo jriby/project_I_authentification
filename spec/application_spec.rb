@@ -1,0 +1,92 @@
+require_relative 'spec_helper'
+require 'application'
+require 'user'
+require 'utilisation'
+
+describe Application do
+
+#Une personne doit être valide si elle dispose d'un nom et d'un prénom. Le login d'une personne doit être unique sur toute la base.
+
+context "init" do
+
+  describe "With good infos" do
+
+	it "should be valid with a name, an url (http) and a user" do
+	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr"}}
+          @application = Application.create(@params['application'])
+          @application.should be_valid
+          @application.destroy
+	end
+
+	it "should be valid with a name, an url (https) and a user" do
+	  @params = { 'application' => {"name" => "appli", "url" => "https://www.julienriby.fr"}}
+          @application = Application.create(@params['application'])
+          @application.should be_valid
+          @application.destroy
+	end
+
+  end
+
+  describe "With info missing" do
+
+	it "should not be valid without a name" do
+          @params = { 'application' => {"url" => "http://www.julienriby.fr"}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:name].include?("is invalid").should be_true
+
+	end
+	
+	it "should not be valid without an url" do
+          @params = { 'application' => {"name" => "appli"}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:url].include?("is invalid").should be_true
+          
+	end
+
+        it "should not be valid if the name is empty" do
+	  @params = { 'application' => {"name" => "", "url" => "http://www.julienriby.fr"}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:name].include?("can't be blank").should be_true	
+	end
+
+        it "should not be valid if the url is empty" do
+	  @params = { 'application' => {"name" => "appli", "url" => ""}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:url].include?("can't be blank").should be_true	
+	end
+  end
+
+  describe "With bad info" do
+        it "should not be valid with a bad url (http://.. ou https:// " do
+	  @params = { 'application' => {"name" => "appli", "url" => "bad"}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:url].include?("is invalid").should be_true
+          	
+	end
+
+        it "should not be valid with a bad name (other char than a-z0-9_-) " do
+	  @params = { 'application' => {"name" => "appli*bad", "url" => "bad"}}
+          @application = Application.create(@params['application'])
+          @application.errors.messages[:name].include?("is invalid").should be_true	
+	end
+
+  end
+
+  describe "Unicity" do
+
+	it "should have a name unique" do
+		
+	  @params1 = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr"}}
+          @application1 = Application.create(@params1['application'])
+
+	  @params2 = { 'application' => {"name" => "appli", "url" => "http://www.julien.fr"}}
+          @application2 = Application.create(@params1['application'])
+
+          @application2.errors.messages[:name].include?("has already been taken").should be_true	
+          @application1.destroy
+          @application2.destroy
+	end
+  end
+end
+
+end
