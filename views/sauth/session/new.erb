@@ -7,6 +7,15 @@
 
 <h1>Portail de connection</h1>
 
+<% if @error_con.nil? %>
+		<p >Saisir votre login et votre mot de passe pour vous connecter</p>
+
+<% else %>
+
+<%= @error_con %>
+
+<% end %>
+
 
 <form action="/sauth/session/new" method="post">
   <div class="field">

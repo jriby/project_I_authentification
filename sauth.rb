@@ -58,7 +58,8 @@ post '/sauth/session/new' do
 
   if User.user_is_present(params['login'],params['passwd'])
     redirect "/index"
-  else        
+  else     
+    @error_con = "Les infos saisies sont incorrectes"   
     erb :"/sauth/session/new"
   end
 
