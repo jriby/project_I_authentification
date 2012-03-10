@@ -2,6 +2,7 @@ require 'sinatra'
 $: << File.dirname(__FILE__)
 require 'middleware/my_middleware'
 require 'lib/user'
+require 'lib/application'
 require 'spec/spec_helper'
 
 use RackCookieSession
@@ -41,6 +42,33 @@ params = { 'user' => {"login" => login, "passwd" => passwd }}
   else
     @error = @u.errors.messages
     erb :"sauth/register"
+  end
+
+end
+
+#########################
+# Portail d'inscription d'appli
+#########################
+get '/sauth/application/new' do
+
+          erb :"/sauth/application/new"
+
+end
+
+post'/sauth/application/new' do
+
+name = params['name']
+url = params['url']
+
+params = { 'application' => {"name" => name, "url" => url }}
+
+  @a = Application.create(params['application'])
+  
+  if @a.valid?
+    redirect "/index"
+  else
+    @error = @a.errors.messages
+    erb :"/sauth/application/new"
   end
 
 end
