@@ -8,7 +8,6 @@ require 'spec/spec_helper'
 use RackCookieSession
 use RackSession
 
-
 helpers do 
   def current_user
     session["current_user"]
@@ -51,7 +50,7 @@ end
 #########################
 get '/sauth/application/new' do
 
-          erb :"/sauth/application/new"
+          erb :"/sauth/application/new", :locals => {:user => current_user}
 
 end
 
@@ -59,16 +58,18 @@ post'/sauth/application/new' do
 
 name = params['name']
 url = params['url']
+uid = User.find_by_login(current_user).id
 
-params = { 'application' => {"name" => name, "url" => url }}
+
+  params = { 'application' => {"name" => name, "url" => url, "user_id" => uid}}
 
   @a = Application.create(params['application'])
-  
+
   if @a.valid?
     redirect "/"
   else
     @error = @a.errors.messages
-    erb :"/sauth/application/new"
+    erb :"/sauth/application/new", :locals => {:user => current_user}
   end
 
 end

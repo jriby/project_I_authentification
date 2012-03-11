@@ -1,6 +1,7 @@
 require '../sauth'
 require 'rack/test'
 require 'test/unit'
+require 'sinatra'
 
 set :environment, :test
 
@@ -10,6 +11,7 @@ describe 'The App' do
   def app
     Sinatra::Application
   end
+
 
 describe "Authenticatin Service" do
 
@@ -214,9 +216,9 @@ describe "Connexion Service" do
 
   end 
 #########################
-#User registration
+#App registration
 #########################
-  describe "User registration" do
+  describe "App registration" do
 #########################
 #get /sauth/application/new
 #########################
@@ -236,12 +238,22 @@ describe "Connexion Service" do
 #########################
     describe "post /sauth/application/new" do
       before do
- 	@params_create = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr"}}
+ 	@params_create = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
         @params = { 'name' => "appli", "url" => "http://www.julienriby.fr" }
-      
+        
         @a = Application.new
         @a.name = "appli"
         @a.url = "http://www.julienriby.fr"
+        @a.user_id = "01"
+
+        @u = User.new
+        @u.id = "01"
+        @u.login = "log"
+        @u.passwd = "pass"
+
+
+        User.stub(:find_by_login).and_return(@u)
+        User.stub(:id).and_return("01")
       end
 
      it "should use create" do
@@ -328,6 +340,7 @@ describe "Connexion Service" do
            at = Application.new
            at.name = "taken"
            at.url = "http://www.julienriby.fr"
+           at.user_id = "01"
            at.save
 
            @a.name = "taken"
