@@ -12,4 +12,6 @@ class Application < ActiveRecord::Base
   validates :url, :presence => true
   validates :url, :format => { :with => /^https?:\/\/[a-z0-9._\/-]+\.[a-z]{2,3}/i, :on => :create }
 
+  validates :user_id, :presence => true
+
 end
