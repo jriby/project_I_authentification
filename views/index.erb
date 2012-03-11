@@ -13,7 +13,12 @@
           <p>Pas encore inscrit? </p>
           <a href="/sauth/register"> Inscription </a>
         <% else %>
+          
 	  <p>Bonjour <%= user %> </p>
+          <% if user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
+          <p></p>
+          <a href="/sauth/application/new"> Inscrire une application </a>
+          <p></p>
           <a href="sessions/deco"> Diconnect </a>
         <% end %>
 

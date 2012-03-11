@@ -343,6 +343,21 @@ describe "Connexion Service" do
       end
     end
   end
+  
+  describe "Connexion Service" do
+
+#########################
+#get /sauth/admin
+#########################
+    describe "get /sauth/admin" do
+      
+      it "should get /sauth/admin" do
+        get '/sauth/admin'
+        last_response.should be_ok
+         end
+    end
+  end
+
 end
 end
 

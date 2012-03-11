@@ -103,4 +103,9 @@ get'/sessions/deco' do
    redirect "/sauth/session/new"
 end
 
-
+#########################
+# Portail d'admin users
+#########################
+get "/sauth/admin" do
+  erb :"/sauth/admin" , :locals => {:user => current_user}
+end
