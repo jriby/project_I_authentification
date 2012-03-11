@@ -38,7 +38,7 @@ params = { 'user' => {"login" => login, "passwd" => passwd }}
   @u = User.create(params['user'])
   
   if @u.valid?
-    redirect "/sauth/session/new"
+    redirect "/"
   else
     @error = @u.errors.messages
     erb :"sauth/register"
@@ -65,7 +65,7 @@ params = { 'application' => {"name" => name, "url" => url }}
   @a = Application.create(params['application'])
   
   if @a.valid?
-    redirect "/index"
+    redirect "/"
   else
     @error = @a.errors.messages
     erb :"/sauth/application/new"
@@ -85,7 +85,8 @@ end
 post '/sauth/session/new' do
 
   if User.user_is_present(params['login'],params['passwd'])
-    redirect "/index"
+    session["current_user"] = params['login']
+    redirect "/"
   else     
     @error_con = "Les infos saisies sont incorrectes"   
     erb :"/sauth/session/new"
@@ -93,8 +94,8 @@ post '/sauth/session/new' do
 
 end
 
-get "/index" do
-  erb :"/index"
+get "/" do
+  erb :"/index" , :locals => {:user => current_user}
 end
 
 get'/sessions/deco' do

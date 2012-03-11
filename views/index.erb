@@ -6,9 +6,16 @@
 <body>
 
 <h1>Bonjour</h1>
-
-	<p>Bonjour</p>
         
+        <% if user.nil? %>
+          <p>Bonjour, Veuillez vous connecter </p>
+          <a href="/sauth/session/new"> Connection </a>
+          <p>Pas encore inscrit? </p>
+          <a href="/sauth/register"> Inscription </a>
+        <% else %>
+	  <p>Bonjour <%= user %> </p>
+          <a href="sessions/deco"> Diconnect </a>
+        <% end %>
 
 </body>
 </html>

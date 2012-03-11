@@ -76,7 +76,7 @@ describe "Authenticatin Service" do
         post '/sauth/register', @params
         last_response.should be_redirect
         follow_redirect!
-        last_request.path.should == '/sauth/session/new'
+        last_request.path.should == '/'
       end
 
       context "Registration is not OK" do
@@ -181,7 +181,7 @@ describe "Connexion Service" do
         post '/sauth/session/new', @params
         last_response.should be_redirect
         follow_redirect!
-        last_request.path.should == '/index'
+        last_request.path.should == '/'
       end
 
       context "Connexion is not OK" do
@@ -268,13 +268,13 @@ describe "Connexion Service" do
         post '/sauth/application/new', @params
       end
 
-      it "should redirect to /index" do
+      it "should redirect to /" do
         Application.stub(:create)
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
         post '/sauth/application/new', @params
         last_response.should be_redirect
         follow_redirect!
-        last_request.path.should == '/index'
+        last_request.path.should == '/'
       end
       context "Inscription app is not OK" do
 
