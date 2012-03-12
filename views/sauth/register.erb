@@ -7,13 +7,23 @@
 
 <h1>Portail d'inscription</h1>
 
-<%= error %>
+<% if @u.nil? %>
+		<p >Saisir un login et un mot de passe pour s'inscrire</p>
+
+<% else %>
+	<p >Les informations saisies sont incorrects</p>
 
 
+<% @error.each do |champ, mess| %>
+<%= champ %> : <%= mess.join(', ') %>
+<% end %>
+
+
+<% end %>
 
 <form action="/sauth/register" method="post">
   <div class="field">
-    <label for="session_login">Login</label><br />
+    <label for="login">Login</label><br />
 
     <input id="login" name="login" size="30" type="text" />
   </div>

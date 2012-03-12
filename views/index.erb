@@ -7,19 +7,41 @@
 
 <h1>Bonjour</h1>
         
-        <% if user.nil? %>
+        <% if @user.nil? %>
           <p>Bonjour, Veuillez vous connecter </p>
           <a href="/sauth/session/new"> Connection </a>
           <p>Pas encore inscrit? </p>
           <a href="/sauth/register"> Inscription </a>
         <% else %>
           
-	  <p>Bonjour <%= user %> </p>
-          <% if user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
+	  <p>Bonjour <%= @user %> </p>
+          <% if !@error.nil? %><%= @error %><% end %>
+          <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
           <p></p>
           <a href="/sauth/application/new"> Inscrire une application </a>
           <p></p>
           <a href="sessions/deco"> Diconnect </a>
+
+          <% u = User.find_by_login(@user)
+             apps = Application.where(:user_id => u.id)
+
+            if !apps.empty?
+          %>
+ 
+           <div class="listappown">
+             <p>List de vos applications</p>
+             
+            <ul>
+            <% apps.each do |a| %>
+            <li><%=a.name%> (<%=a.url%>) - <a href="/sauth/application/delete?app=<%=a.id%>">delete</a> </li>
+            <% end %>
+            </ul>
+            </div>
+
+            <%else%>
+            <p>Vous n'avez créé aucune application.</p>
+            <%end%>
+
         <% end %>
 
 </body>

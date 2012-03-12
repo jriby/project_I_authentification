@@ -1,14 +1,15 @@
-require 'sinatra'
 $: << File.dirname(__FILE__)
+require 'sinatra'
 require 'middleware/my_middleware'
 require 'lib/user'
 require 'lib/application'
+require 'lib/utilisation'
 require 'spec/spec_helper'
 
 use RackCookieSession
 use RackSession
 
-helpers do 
+helpers do
   def current_user
     session["current_user"]
   end
@@ -50,22 +51,28 @@ end
 #########################
 get '/sauth/application/new' do
 
-          erb :"/sauth/application/new", :locals => {:user => current_user}
+  if current_user
+    erb :"/sauth/application/new", :locals => {:user => current_user}
+  else
+    erb :"/sauth/session/new"
 
+  end
 end
 
 post'/sauth/application/new' do
 
 name = params['name']
 url = params['url']
-uid = User.find_by_login(current_user).id
-
+@u = User.find_by_login(current_user)
+uid = @u.id
 
   params = { 'application' => {"name" => name, "url" => url, "user_id" => uid}}
 
   @a = Application.create(params['application'])
 
   if @a.valid?
+    @params_util = { 'utilisation' => {"application" =>  @a, "user" => @u}}
+    @utilisation = Utilisation.create(@params_util['utilisation'])
     redirect "/"
   else
     @error = @a.errors.messages
@@ -73,6 +80,23 @@ uid = User.find_by_login(current_user).id
   end
 
 end
+
+#########################
+# Destruction d'appli
+#########################
+
+get "/sauth/application/delete" do
+
+  if session["current_user"]
+    @login = session["current_user"]
+    erb :"/sauth/application/delete"
+  else
+
+    redirect 'sauth/sessions/new'
+
+  end
+end
+
 
 #########################
 # Portail de connection
@@ -96,9 +120,9 @@ post '/sauth/session/new' do
 end
 
 get "/" do
-  erb :"/index" , :locals => {:user => current_user}
+  @user = current_user
+  erb :"/index"
 end
-
 get'/sessions/deco' do
    disconnect
    redirect "/sauth/session/new"
@@ -108,5 +132,7 @@ end
 # Portail d'admin users
 #########################
 get "/sauth/admin" do
-  erb :"/sauth/admin" , :locals => {:user => current_user}
+  @user = current_user
+  erb :"/sauth/admin"
+
 end

@@ -1,9 +1,7 @@
 require '../sauth'
 require 'rack/test'
-require 'test/unit'
-require 'sinatra'
 
-set :environment, :test
+set :sessions, true
 
 describe 'The App' do
   include Rack::Test::Methods
@@ -227,11 +225,20 @@ describe "Connexion Service" do
         get '/sauth/application/new'
         last_response.should be_ok
          end
-
-      it "should return a form to post registration info to /sauth/application/new" do
-        get '/sauth/application/new'
-        last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+      context "with current user" do
+        it "should return a form to post registration info to /sauth/application/new" do
+          helper.stub(:current_user).and_return(true)
+          get '/sauth/application/new'
+          last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
          end
+      end
+      context "without current user" do
+        it "should return a form to post connexion info to /sauth/session/new" do
+          get '/sauth/application/new'
+          last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+        end
+      end
+
     end
 #########################
 #post /sauth/application/new
