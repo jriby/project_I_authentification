@@ -15,15 +15,16 @@
         <% else %>
           
 	  <p>Bonjour <%= @user %> </p>
-          <% if !@error.nil? %><%= @error %><% end %>
-          <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
+            <% if !@error.nil? %><%= @error %><% end %>
+            <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
           <p></p>
           <a href="/sauth/application/new"> Inscrire une application </a>
           <p></p>
-          <a href="sessions/deco"> Diconnect </a>
+          <a href="sessions/deco"> Deco </a>
 
           <% u = User.find_by_login(@user)
-             apps = Application.where(:user_id => u.id)
+             uid = u.id
+             apps = Application.where(:user_id => uid)
 
             if !apps.empty?
           %>
@@ -32,16 +33,32 @@
              <p>List de vos applications</p>
              
             <ul>
-            <% apps.each do |a| %>
-            <li><%=a.name%> (<%=a.url%>) - <a href="/sauth/application/delete?app=<%=a.id%>">delete</a> </li>
-            <% end %>
+              <% apps.each do |a| %>
+                <li><%=a.name%>  : <%=a.url%> - <a href="/sauth/application/delete?app=<%=a.id%>">effacer</a> </li>
+              <% end %>
             </ul>
             </div>
 
             <%else%>
-            <p>Vous n'avez créé aucune application.</p>
+              <p>Vous n'avez créé aucune application.</p>
             <%end%>
 
+            <% utils = Utilisation.where(:user_id => uid)
+              if !utils.empty?
+            %>
+            <div class="listappuse">
+            <p>Listes des application que vous pouvez utiliser</p>
+              <ul>
+                <% utils.each do |util| %>
+                  <% app = Application.find_by_id(util.application_id) %>
+                  <li><%=app.name%> : <%=app.url%></li>
+                <% end %>
+              </ul>
+            </div>
+
+           <%else%>
+             <p>Vous n'utilisez aucune application</p>
+           <%end%>
         <% end %>
 
 </body>
