@@ -1,0 +1,14 @@
+
+<%
+    if @login.nil? || @login != "admin"
+        @error = "Vous n'avez pas les droits : Vous devez être admin pour supprimer un user"
+        redirect "/"
+
+    else
+        u = User.find_by_id(params["usr"])
+          u.destroy
+          redirect "/sauth/admin"
+
+   end
+  
+%>

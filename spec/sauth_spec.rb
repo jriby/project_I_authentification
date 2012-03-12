@@ -221,20 +221,28 @@ describe "Connexion Service" do
 #get /sauth/application/new
 #########################
     describe "get /sauth/application/new" do
-      it "should get /sauth/application/new" do
-        get '/sauth/application/new'
-        last_response.should be_ok
-         end
       context "with current user" do
         it "should return a form to post registration info to /sauth/application/new" do
-          helper.stub(:current_user).and_return(true)
+          u = User.new
+          u.login = "log"
+          u.passwd = "pass"    
+          u.save
+          @params = { 'login' => "log", 'passwd' => "pass" }
+          post "/sauth/session/new", @params
+          follow_redirect!
+          last_request.path.should == '/'
+          last_request.env["rack.session"]["current_user"].should == "log"
+          
           get '/sauth/application/new'
           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
-         end
+          u.destroy
+        end
       end
       context "without current user" do
         it "should return a form to post connexion info to /sauth/session/new" do
           get '/sauth/application/new'
+          follow_redirect!
+          last_response.should be_ok
           last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
         end
       end
@@ -375,6 +383,92 @@ describe "Connexion Service" do
         get '/sauth/admin'
         last_response.should be_ok
          end
+    end
+  end
+
+#########################
+# Destruction d'appli
+#########################
+    describe "get /sauth/application/delete" do
+      context "with current user" do
+        it "should get /sauth/application/delete" do
+          u = User.new
+          u.login = "log"
+          u.passwd = "pass"    
+          u.save
+          @params = { 'login' => "log", 'passwd' => "pass" }
+          post "/sauth/session/new", @params
+          follow_redirect!
+          last_request.path.should == '/'
+          last_request.env["rack.session"]["current_user"].should == "log"
+          
+          get '/sauth/application/delete'
+          last_response.body.should match %r{}
+          u.destroy
+        end
+      end
+      context "without current user" do
+        it "should redirect to /" do
+          get '/sauth/application/delete'
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.path.should == '/sauth/sessions/new'
+        end
+      end
+  end
+
+#########################
+# Portail d'admin users
+#########################
+  describe "get /sauth/admin" do
+    it "should get /sauth/admin" do
+       get '/sauth/admin'
+       last_response.should be_ok
+      end
+    end
+
+
+#########################
+# Destruction de user
+#########################
+
+#get "/sauth/users/delete" do
+
+#  if session["current_user"]
+#    @login = session["current_user"]
+#    erb :"/sauth/users/delete"
+#  else
+#    redirect '/'
+
+#  end
+#end
+
+  describe "get /sauth/users/delete" do
+    context "Without current user" do
+      it "should redirect to /" do
+        get '/sauth/users/delete'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'
+      end
+    end
+    context "With current user" do
+      it "should go to /sauth/users/delete" do
+        u = User.new
+        u.login = "log"
+        u.passwd = "pass"    
+        u.save
+        @params = { 'login' => "log", 'passwd' => "pass" }
+        post "/sauth/session/new", @params
+        follow_redirect!
+        last_request.path.should == '/'
+        last_request.env["rack.session"]["current_user"].should == "log"
+         
+        get '/sauth/users/delete'
+        last_response.body.should == ""
+        u.destroy
+
+      end
     end
   end
 

@@ -6,7 +6,7 @@ require 'utilisation'
 describe Utilisation do
     before do
         @params_user = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
-	@params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr"}}
+	@params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
     end
 
   describe "With good infos" do

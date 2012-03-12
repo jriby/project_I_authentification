@@ -1,13 +1,11 @@
 $: << File.dirname(__FILE__)
 require 'sinatra'
-require 'middleware/my_middleware'
 require 'lib/user'
 require 'lib/application'
 require 'lib/utilisation'
 require 'spec/spec_helper'
 
-use RackCookieSession
-use RackSession
+enable :sessions
 
 helpers do
   def current_user
@@ -52,14 +50,14 @@ end
 get '/sauth/application/new' do
 
   if current_user
-    erb :"/sauth/application/new", :locals => {:user => current_user}
+    erb :"/sauth/application/new"
   else
-    erb :"/sauth/session/new"
+    redirect "/sauth/session/new"
 
   end
 end
 
-post'/sauth/application/new' do
+post '/sauth/application/new' do
 
 name = params['name']
 url = params['url']
@@ -135,4 +133,20 @@ get "/sauth/admin" do
   @user = current_user
   erb :"/sauth/admin"
 
+end
+
+
+#########################
+# Destruction de user
+#########################
+
+get "/sauth/users/delete" do
+
+  if session["current_user"]
+    @login = session["current_user"]
+    erb :"/sauth/users/delete"
+  else
+    redirect '/'
+
+  end
 end

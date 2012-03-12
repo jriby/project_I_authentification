@@ -14,6 +14,20 @@
           
           <p>Vous êtes le grand maître du sauth </p>
           <a href="/"> Retourner à l'acceuil </a>
+
+         <% users = User.all%>
+
+           <div class="listappown">
+             <p>List des users</p>
+             
+            <ul>
+              <% users.each do |u| %> 
+                <%if u.login != "admin"%> 
+                  <li><%=u.login%> - <a href="/sauth/users/delete?usr=<%=u.id%>">Supprimer</a> </li>
+                <% end %>              
+              <% end %>
+            </ul>
+            </div>
         <% end %>
         
 
