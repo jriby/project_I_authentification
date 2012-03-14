@@ -432,16 +432,6 @@ describe "Connexion Service" do
 # Destruction de user
 #########################
 
-#get "/sauth/users/delete" do
-
-#  if session["current_user"]
-#    @login = session["current_user"]
-#    erb :"/sauth/users/delete"
-#  else
-#    redirect '/'
-
-#  end
-#end
 
   describe "get /sauth/users/delete" do
     context "Without current user" do
@@ -453,21 +443,52 @@ describe "Connexion Service" do
       end
     end
     context "With current user" do
-      it "should go to /sauth/users/delete" do
+      it "should delete the user if the curent user is admin" do
         u = User.new
-        u.login = "log"
+        u.login = "admin"
         u.passwd = "pass"    
         u.save
-        @params = { 'login' => "log", 'passwd' => "pass" }
+        ud = User.new
+        ud.id = 666
+        ud.login = "utodel"
+        ud.passwd = "pass"    
+        ud.save
+
+        @params = { 'login' => "admin", 'passwd' => "pass" }
         post "/sauth/session/new", @params
         follow_redirect!
         last_request.path.should == '/'
-        last_request.env["rack.session"]["current_user"].should == "log"
+        last_request.env["rack.session"]["current_user"].should == "admin"
          
-        get '/sauth/users/delete'
-        last_response.body.should == ""
+        @params_del = { "usr" => 666}
+        udel = User.find_by_id(666)
+        udel.should == ud
+        get '/sauth/users/delete', @params_del
+        udel = User.find_by_id(@params["usr"])
+        udel.should == nil
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/sauth/admin'
         u.destroy
 
+      end
+      it "should delete the user if the curent user is not admin" do
+        u = User.new
+        u.login = "lol"
+        u.passwd = "pass"    
+        u.save
+        @params = { 'login' => "lol", 'passwd' => "pass" }
+        post "/sauth/session/new", @params
+        follow_redirect!
+        last_request.path.should == '/'
+        last_request.env["rack.session"]["current_user"].should == "lol"
+        
+        get '/sauth/users/delete'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'        
+
+        u.destroy
       end
     end
   end

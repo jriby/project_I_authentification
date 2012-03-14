@@ -142,11 +142,14 @@ end
 
 get "/sauth/users/delete" do
 
-  if session["current_user"]
-    @login = session["current_user"]
-    erb :"/sauth/users/delete"
-  else
-    redirect '/'
+  if session["current_user"] == "admin" 
+   u = User.find_by_id(params["usr"])
+   u.destroy
+   redirect "/sauth/admin"
 
+   else
+    @error = 'Pas les droits pour supprimer un user'
+    redirect "/"
   end
+
 end
