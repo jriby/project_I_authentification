@@ -408,11 +408,9 @@ describe "Connexion Service" do
         end
       end
       context "without current user" do
-        it "should redirect to /" do
+        it "should go to index" do
           get '/sauth/application/delete'
-          last_response.should be_redirect
-          follow_redirect!
-          last_request.path.should == '/sauth/sessions/new'
+          last_response.body.should match %r{<h1>Bonjour</h1>.*}
         end
       end
   end
@@ -437,9 +435,7 @@ describe "Connexion Service" do
     context "Without current user" do
       it "should redirect to /" do
         get '/sauth/users/delete'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'
+        last_response.body.should match %r{<h1>Bonjour</h1>.*}
       end
     end
     context "With current user" do
@@ -466,13 +462,11 @@ describe "Connexion Service" do
         get '/sauth/users/delete', @params_del
         udel = User.find_by_id(@params["usr"])
         udel.should == nil
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/sauth/admin'
+        last_response.body.should match %r{<h1>Admin users</h1>.*}
         u.destroy
 
       end
-      it "should delete the user if the curent user is not admin" do
+      it "should go to index if the curent user is not admin" do
         u = User.new
         u.login = "lol"
         u.passwd = "pass"    
@@ -484,9 +478,7 @@ describe "Connexion Service" do
         last_request.env["rack.session"]["current_user"].should == "lol"
         
         get '/sauth/users/delete'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'        
+        last_response.body.should match %r{<h1>Bonjour</h1>.*}        
 
         u.destroy
       end
