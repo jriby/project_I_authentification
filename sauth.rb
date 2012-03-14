@@ -86,8 +86,34 @@ end
 get "/sauth/application/delete" do
 
   if session["current_user"]
-    @login = session["current_user"]
-    erb :"/sauth/application/delete"
+    
+    app = Application.find_by_id(params["app"])
+
+    if !app.nil?
+      user = User.find_by_login(session["current_user"])
+      if app.user_id != user.id
+        @user = current_user
+        @error = "Vous n'avez pas les droits : cette application n'est pas a vous"
+        erb :"/index"
+
+      else
+        uti = Utilisation.where(:application_id => app.id)
+       
+        uti.each do |u|
+          u.destroy
+        end
+
+        app.destroy
+        @user = current_user
+        erb :"/index"
+      end
+
+    else
+      @error = "Cette application n'existe pas"
+      @user = current_user  
+      erb :"/index"
+   end
+
   else
 
     redirect 'sauth/sessions/new'
