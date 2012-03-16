@@ -17,7 +17,7 @@
 <% end %>
 
 
-<form action="/sauth/session/new" method="post">
+<form action="/sessions" method="post">
   <div class="field">
     <label for="session_login">Login</label><br />
 
@@ -28,14 +28,14 @@
     <input id="passwd" name="passwd" size="30" type="password" />
   </div>
   <div class="actions">
-    <input name="commit" type="submit" value="Register" />
+    <input name="commit" type="submit" value="Connexion" />
 
   </div>
 </form>
 
 <p></p>
 <p>Pas encore inscrit? </p>
-          <a href="/sauth/register"> Inscription </a>
+          <a href="/users/new"> Inscription </a>
 </body>
 </html>
 

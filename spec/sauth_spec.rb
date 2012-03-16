@@ -21,21 +21,21 @@ describe "Authenticatin Service" do
 #########################
 #get /sauth/register
 #########################
-    describe "get /sauth/register" do
-      it "should get /sauth/register" do
-        get '/sauth/register'
+    describe "get /users/new" do
+      it "should get /users/new" do
+        get '/users/new'
         last_response.should be_ok
          end
 
-      it "should return a form to post registration info to /sauth/register" do
-        get '/sauth/register'
-        last_response.body.should match %r{<form action="/sauth/register" method="post".*}
+      it "should return a form to post registration info to /users" do
+        get '/users/new'
+        last_response.body.should match %r{<form action="/users" method="post".*}
          end
     end
 #########################
-#post /sauth/register
+#post /users
 #########################
-    describe "post /sauth/register" do
+    describe "post /users" do
       before do
        @params_create = { 'user' => {"login" => "login", "passwd" => "pass" }}
         @params = { 'login' => "login", "passwd" => "pass" }
@@ -49,7 +49,7 @@ describe "Authenticatin Service" do
 
         User.stub(:create)
         User.should_receive(:create).with(@params_create['user']).and_return(@u)
-        post '/sauth/register', @params
+        post '/users', @params
       end
 
       it "should create user with login set in browser" do
@@ -58,7 +58,7 @@ describe "Authenticatin Service" do
         User.should_receive(:create).with(@params_create['user']).and_return(@u)
          
         @u.login.should == @params['login']
-        post '/sauth/register', @params
+        post '/users', @params
       end
 
       it "should create user with passwd encypt set in browser" do
@@ -66,17 +66,17 @@ describe "Authenticatin Service" do
         User.stub(:create)
         User.should_receive(:create).with(@params_create['user']).and_return(@u)
         @u.passwd.should == User.encrypt_password(@params['passwd'])
-        post '/sauth/register', @params
+        post '/users', @params
       end
 
 
-      it "should redirect to /sauth/session/new" do
+      it "should redirect to /session/new" do
         User.stub(:create)
         User.should_receive(:create).with(@params_create['user']).and_return(@u)
-        post '/sauth/register', @params
+        post '/users', @params
         last_response.should be_redirect
         follow_redirect!
-        last_request.path.should == '/'
+        last_request.path.should == '/session/new'
       end
 
       context "Registration is not OK" do
@@ -86,8 +86,8 @@ describe "Authenticatin Service" do
            @u.login = ""
            User.stub(:create)
            User.should_receive(:create).with(@params_create['user']).and_return(@u)
-           post '/sauth/register', @params
-           last_response.body.should match %r{<form action="/sauth/register" method="post".*}
+           post '/users', @params
+           last_response.body.should match %r{<form action="/users" method="post".*}
          end
 
          it "should render the registration form if the pass is not set" do
@@ -95,8 +95,8 @@ describe "Authenticatin Service" do
            @u.passwd = ""
            User.stub(:create)
            User.should_receive(:create).with(@params_create['user']).and_return(@u)
-           post '/sauth/register', @params
-           last_response.body.should match %r{<form action="/sauth/register" method="post".*}
+           post '/users', @params
+           last_response.body.should match %r{<form action="/users" method="post".*}
          end
 
 
@@ -106,8 +106,8 @@ describe "Authenticatin Service" do
            @u.passwd = ""
            User.stub(:create)
            User.should_receive(:create).with(@params_create['user']).and_return(@u)
-           post '/sauth/register', @params
-           last_response.body.should match %r{<form action="/sauth/register" method="post".*}
+           post '/users', @params
+           last_response.body.should match %r{<form action="/users" method="post".*}
          end
 
         it "should render the registration form if the login is already taken" do
@@ -121,8 +121,8 @@ describe "Authenticatin Service" do
            @u.passwd = "taken"
            User.stub(:create)
            User.should_receive(:create).with(@params_create['user']).and_return(@u)
-           post '/sauth/register', @params
-           last_response.body.should match %r{<form action="/sauth/register" method="post".*}
+           post '/users', @params
+           last_response.body.should match %r{<form action="/users" method="post".*}
 
            ut.destroy
          end
@@ -140,20 +140,20 @@ describe "Connexion Service" do
 #########################
 #get /sauth/session/new
 #########################
-    describe "get /sauth/session/new" do
+    describe "get /session/new" do
       
-      it "should get /sauth/session/new" do
-        get '/sauth/session/new'
+      it "should get /session/new" do
+        get '/session/new'
         last_response.should be_ok
          end
 
-      it "should return a form to post registration info to /sauth/session/new" do
-        get '/sauth/session/new'
-        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+      it "should return a form to post registration info to /sessions" do
+        get '/session/new'
+        last_response.body.should match %r{<form action="/sessions" method="post".*}
          end
     end
 
-    describe "post /sauth/session/new" do
+    describe "post /sessions" do
       before do
         @params = { 'login' => "login", "passwd" => "pass" }
       
@@ -162,23 +162,15 @@ describe "Connexion Service" do
       it "Should use user is present" do
         User.stub(:user_is_present)
         User.should_receive(:user_is_present).with("login", "pass")
-        post '/sauth/session/new', @params
+        post '/sessions', @params
 
 
-      end
-
-      it "Should redirect if the log and pass is prensent" do
-
-        User.stub(:user_is_present)
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
-        post '/sauth/session/new', @params
-        last_response.should be_redirect
       end
 
       it "Should redirect to the user page if the log and pass is prensent" do
         User.stub(:user_is_present)
         User.should_receive(:user_is_present).with("login", "pass").and_return(true)
-        post '/sauth/session/new', @params
+        post '/sessions', @params
         last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
@@ -186,27 +178,27 @@ describe "Connexion Service" do
 
       context "Connexion is not OK" do
 
-      it "Should go to get /sauth/session/new if the log and pass is not prensent" do
+      it "Should return the connexion form if the log and pass is not prensent" do
         User.stub(:user_is_present)
         User.should_receive(:user_is_present).with("login", "pass").and_return(false)
-        post '/sauth/session/new', @params
-        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+        post '/sessions', @params
+        last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
 
-      it "Should go to get /sauth/session/new if the log is not given" do
+      it "Should return the connexion form if the log is not given" do
         @params['login']="" 
         User.stub(:user_is_present)
         User.should_receive(:user_is_present).with("", "pass").and_return(false)
-        post '/sauth/session/new', @params
-        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+        post '/sessions', @params
+        last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
 
-      it "Should go to get /sauth/session/new if the pass is not given" do
+      it "Should return the connexion form if the pass is not given" do
         @params['passwd']=""
         User.stub(:user_is_present)
         User.should_receive(:user_is_present).with("login", "").and_return(false)
-        post '/sauth/session/new', @params
-        last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+        post '/sessions', @params
+        last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
 
       end
@@ -228,7 +220,7 @@ describe "Connexion Service" do
           u.passwd = "pass"    
           u.save
           @params = { 'login' => "log", 'passwd' => "pass" }
-          post "/sauth/session/new", @params
+          post "/sessions", @params
           follow_redirect!
           last_request.path.should == '/'
           last_request.env["rack.session"]["current_user"].should == "log"
@@ -239,11 +231,12 @@ describe "Connexion Service" do
         end
       end
       context "without current user" do
-        it "should return a form to post connexion info to /sauth/session/new" do
+        it "should return a form to post connexion info to /session/new" do
           get '/sauth/application/new'
           follow_redirect!
           last_response.should be_ok
-          last_response.body.should match %r{<form action="/sauth/session/new" method="post".*}
+          last_request.path.should == '/session/new'
+          last_response.body.should match %r{<form action="/sessions" method="post".*}
         end
       end
 
@@ -397,7 +390,7 @@ describe "Connexion Service" do
           u.passwd = "pass"    
           u.save
           @params = { 'login' => "log", 'passwd' => "pass" }
-          post "/sauth/session/new", @params
+          post "/sessions", @params
           follow_redirect!
           last_request.path.should == '/'
           last_request.env["rack.session"]["current_user"].should == "log"
@@ -451,7 +444,7 @@ describe "Connexion Service" do
         ud.save
 
         @params = { 'login' => "admin", 'passwd' => "pass" }
-        post "/sauth/session/new", @params
+        post "/sessions", @params
         follow_redirect!
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "admin"
@@ -472,7 +465,7 @@ describe "Connexion Service" do
         u.passwd = "pass"    
         u.save
         @params = { 'login' => "lol", 'passwd' => "pass" }
-        post "/sauth/session/new", @params
+        post "/sessions", @params
         follow_redirect!
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "lol"

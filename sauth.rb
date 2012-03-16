@@ -20,13 +20,13 @@ end
 #########################
 # Portail d'inscription
 #########################
-get '/sauth/register' do
+get '/users/new' do
 
-          erb :"sauth/register"
+          erb :"user/new"
 
 end
 
-post'/sauth/register' do
+post'/users' do
 
 login = params['login']
 passwd = params['passwd']
@@ -36,12 +36,44 @@ params = { 'user' => {"login" => login, "passwd" => passwd }}
   @u = User.create(params['user'])
   
   if @u.valid?
-    redirect "/"
+    redirect '/session/new'
   else
     @error = @u.errors.messages
-    erb :"sauth/register"
+    erb :"user/new"
   end
 
+end
+
+
+#########################
+# Portail de connection
+#########################
+get '/session/new' do
+          
+          erb :"session/new"
+
+end
+
+post '/sessions' do
+
+  if User.user_is_present(params['login'],params['passwd'])
+    session["current_user"] = params['login']
+    redirect "/"
+  else     
+    @error_con = "Les infos saisies sont incorrectes"   
+    erb :"/session/new"
+  end
+
+end
+
+get "/" do
+  @user = current_user
+  erb :"/index"
+end
+
+get '/sessions/disconnect' do
+   disconnect
+   redirect "/session/new"
 end
 
 #########################
@@ -52,7 +84,7 @@ get '/sauth/application/new' do
   if current_user
     erb :"/sauth/application/new"
   else
-    redirect "/sauth/session/new"
+    redirect "/session/new"
 
   end
 end
@@ -122,35 +154,6 @@ get "/sauth/application/delete" do
 end
 
 
-#########################
-# Portail de connection
-#########################
-get '/sauth/session/new' do
-          
-          erb :"/sauth/session/new"
-
-end
-
-post '/sauth/session/new' do
-
-  if User.user_is_present(params['login'],params['passwd'])
-    session["current_user"] = params['login']
-    redirect "/"
-  else     
-    @error_con = "Les infos saisies sont incorrectes"   
-    erb :"/sauth/session/new"
-  end
-
-end
-
-get "/" do
-  @user = current_user
-  erb :"/index"
-end
-get'/sessions/deco' do
-   disconnect
-   redirect "/sauth/session/new"
-end
 
 #########################
 # Portail d'admin users
