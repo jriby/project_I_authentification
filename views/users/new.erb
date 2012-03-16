@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Portail d'inscription</title>
+</head>
+<body>
+
+<h1>Portail d'inscription</h1>
+
+<% if @u.nil? %>
+		<p >Saisir un login et un mot de passe pour s'inscrire</p>
+
+<% else %>
+	<p >Les informations saisies sont incorrects</p>
+
+
+<% @error.each do |champ, mess| %>
+<%= champ %> : <%= mess.join(', ') %>
+<% end %>
+
+
+<% end %>
+
+<form action="/users" method="post">
+  <div class="field">
+    <label for="login">Login</label><br />
+
+    <input id="login" name="login" size="30" type="text" />
+  </div>
+  <div class="field">
+    <label for="passwd">Mot de passe</label><br />
+    <input id="passwd" name="passwd" size="30" type="password" />
+  </div>
+  <div class="actions">
+    <input name="commit" type="submit" value="Register" />
+
+  </div>
+</form>
+ 
+         <a href="/"> Retourner à l'acceuil </a>
+
+</body>
+</html>
+

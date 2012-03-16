@@ -22,7 +22,7 @@ end
 #########################
 get '/users/new' do
 
-          erb :"user/new"
+          erb :"users/new"
 
 end
 
@@ -39,7 +39,7 @@ params = { 'user' => {"login" => login, "passwd" => passwd }}
     redirect '/session/new'
   else
     @error = @u.errors.messages
-    erb :"user/new"
+    erb :"users/new"
   end
 
 end
@@ -112,6 +112,31 @@ uid = @u.id
 end
 
 #########################
+# Profile utilisateur
+#########################
+get "/users/:login" do
+
+  if session["current_user"] == params[:login]
+  @user = params[:login]
+  erb :"users/profil"
+  else
+  redirect "/"
+  end
+
+end
+
+
+#########################
+# Portail d'admin users
+#########################
+get "/sauth/admin" do
+  @user = current_user
+  erb :"/sauth/admin"
+
+end
+
+
+#########################
 # Destruction d'appli
 #########################
 
@@ -154,15 +179,6 @@ get "/sauth/application/delete" do
 end
 
 
-
-#########################
-# Portail d'admin users
-#########################
-get "/sauth/admin" do
-  @user = current_user
-  erb :"/sauth/admin"
-
-end
 
 
 #########################

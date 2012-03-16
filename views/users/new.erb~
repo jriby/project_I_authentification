@@ -21,7 +21,7 @@
 
 <% end %>
 
-<form action="/sauth/register" method="post">
+<form action="/users/new" method="post">
   <div class="field">
     <label for="login">Login</label><br />
 
@@ -32,7 +32,7 @@
     <input id="passwd" name="passwd" size="30" type="password" />
   </div>
   <div class="actions">
-    <input name="commit" type="submit" value="Register" />
+    <input name="commit" type="submit" value="Connexion" />
 
   </div>
 </form>

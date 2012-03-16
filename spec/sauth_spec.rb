@@ -205,6 +205,90 @@ describe "Connexion Service" do
     end
 
   end 
+
+#########################
+#get /
+#########################
+    describe "get /" do
+      
+      it "should get /" do
+        get '/'
+        last_response.should be_ok
+        last_request.path.should == '/'
+         end
+
+      it "should return the index page" do
+        get '/'
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+         end
+    end
+
+#########################
+#get /users/:login
+#########################
+    describe "get /users" do
+
+    before do 
+       u = User.new
+       u.login = "lolo"
+       u.passwd = "pass"    
+       u.save
+       @params = { 'login' => "lolo", 'passwd' => "pass" }
+       post "/sessions", @params
+       follow_redirect!
+       last_request.path.should == '/'
+       last_request.env["rack.session"]["current_user"].should == "lolo"
+
+    end
+      
+      it "should get /users" do
+
+          u = User.new
+          u.login = "lolo"
+          u.passwd = "pass"    
+          u.save
+          @params = { 'login' => "lolo", 'passwd' => "pass" }
+          post "/sessions", @params
+          follow_redirect!
+          last_request.path.should == '/'
+          last_request.env["rack.session"]["current_user"].should == "lolo"
+
+        get '/users/lolo'
+        last_response.should be_ok
+        last_request.path.should == '/users/lolo'
+         end
+
+      it "should return the user page" do
+        get '/users/lolo'
+        last_response.body.should match %r{<h1>Profil User</h1>.*}
+      end
+
+      context "without good current_user" do
+        it "should return the acceuil" do
+          get '/users/momo'
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.path.should == '/'
+          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+
+        end
+      end
+      context "without current_user" do
+        it "should return the acceuil" do
+          get '/sessions/disconnect'
+          get '/users/momo'
+          last_request.env["rack.session"]["current_user"].should == nil
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.path.should == '/'
+          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        end
+      end
+
+    end
+
+
+
 #########################
 #App registration
 #########################
@@ -403,7 +487,7 @@ describe "Connexion Service" do
       context "without current user" do
         it "should go to index" do
           get '/sauth/application/delete'
-          last_response.body.should match %r{<h1>Bonjour</h1>.*}
+          last_response.body.should match %r{<h1>Acceuil</h1>.*}
         end
       end
   end
@@ -428,7 +512,7 @@ describe "Connexion Service" do
     context "Without current user" do
       it "should redirect to /" do
         get '/sauth/users/delete'
-        last_response.body.should match %r{<h1>Bonjour</h1>.*}
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}
       end
     end
     context "With current user" do
@@ -471,7 +555,7 @@ describe "Connexion Service" do
         last_request.env["rack.session"]["current_user"].should == "lol"
         
         get '/sauth/users/delete'
-        last_response.body.should match %r{<h1>Bonjour</h1>.*}        
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}        
 
         u.destroy
       end
