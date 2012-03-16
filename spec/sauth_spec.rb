@@ -508,10 +508,10 @@ describe "Connexion Service" do
 #########################
 
 
-  describe "get /sauth/users/delete" do
+  describe "delete /users/:login" do
     context "Without current user" do
       it "should redirect to /" do
-        get '/sauth/users/delete'
+        delete '/users/lol'
         last_response.body.should match %r{<h1>Acceuil</h1>.*}
       end
     end
@@ -522,7 +522,6 @@ describe "Connexion Service" do
         u.passwd = "pass"    
         u.save
         ud = User.new
-        ud.id = 666
         ud.login = "utodel"
         ud.passwd = "pass"    
         ud.save
@@ -533,13 +532,10 @@ describe "Connexion Service" do
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "admin"
          
-        @params_del = { "usr" => 666}
-        udel = User.find_by_id(666)
-        udel.should == ud
-        get '/sauth/users/delete', @params_del
-        udel = User.find_by_id(@params["usr"])
+        delete '/users/utodel', :locals => {:login => "utodel"}
+        udel = User.find_by_login("utodel")
         udel.should == nil
-        last_response.body.should match %r{<h1>Admin users</h1>.*}
+        last_response.body.should match %r{<h1>Admin Page</h1>.*}
         u.destroy
 
       end
@@ -554,7 +550,7 @@ describe "Connexion Service" do
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "lol"
         
-        get '/sauth/users/delete'
+        delete '/users/lol'
         last_response.body.should match %r{<h1>Acceuil</h1>.*}        
 
         u.destroy

@@ -127,6 +127,25 @@ end
 
 
 #########################
+# Destruction de user
+#########################
+
+delete "/users/:login" do
+
+  if session["current_user"] == "admin" 
+   u = User.find_by_login(params["login"])
+   u.destroy
+   erb :"/sauth/admin"
+
+   else
+    @error = 'Pas les droits pour supprimer un user'
+    @user = current_user
+    erb :"/index"
+  end
+
+end
+
+#########################
 # Portail d'admin users
 #########################
 get "/sauth/admin" do
@@ -181,21 +200,3 @@ end
 
 
 
-#########################
-# Destruction de user
-#########################
-
-get "/sauth/users/delete" do
-
-  if session["current_user"] == "admin" 
-   u = User.find_by_id(params["usr"])
-   u.destroy
-   erb :"/sauth/admin"
-
-   else
-    @error = 'Pas les droits pour supprimer un user'
-    @user = current_user
-    erb :"/index"
-  end
-
-end

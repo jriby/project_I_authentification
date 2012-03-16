@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<h1>Admin users</h1>
+<h1>Admin Page</h1>
         
         <% if @user.nil? || @user != "admin" %>
           <p>Vous n'avez pas les droits </p>
@@ -22,8 +22,9 @@
              
             <ul>
               <% users.each do |u| %> 
-                <%if u.login != "admin"%> 
-                  <li><%=u.login%> - <a href="/sauth/users/delete?usr=<%=u.id%>">Supprimer</a> </li>
+                <%if u.login != "admin"%>
+                   
+                  <li><%=u.login%> - <a href="/users/<%= u.login%>">Supprimer</a> </li>
                 <% end %>              
               <% end %>
             </ul>
