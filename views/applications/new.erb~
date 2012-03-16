@@ -22,7 +22,7 @@
 
 <% end %>
 
-<form action="/sauth/application/new" method="post">
+<form action="/applications" method="post">
   <div class="field">
     <label for="name">Name</label><br />
 

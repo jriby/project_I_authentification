@@ -296,9 +296,9 @@ describe "Connexion Service" do
 #########################
 #get /sauth/application/new
 #########################
-    describe "get /sauth/application/new" do
+    describe "get /applications/new" do
       context "with current user" do
-        it "should return a form to post registration info to /sauth/application/new" do
+        it "should return a form to post registration info to /applications" do
           u = User.new
           u.login = "log"
           u.passwd = "pass"    
@@ -309,14 +309,14 @@ describe "Connexion Service" do
           last_request.path.should == '/'
           last_request.env["rack.session"]["current_user"].should == "log"
           
-          get '/sauth/application/new'
-          last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+          get '/applications/new'
+          last_response.body.should match %r{<form action="/applications" method="post".*}
           u.destroy
         end
       end
       context "without current user" do
         it "should return a form to post connexion info to /session/new" do
-          get '/sauth/application/new'
+          get '/applications/new'
           follow_redirect!
           last_response.should be_ok
           last_request.path.should == '/session/new'
@@ -328,7 +328,7 @@ describe "Connexion Service" do
 #########################
 #post /sauth/application/new
 #########################
-    describe "post /sauth/application/new" do
+    describe "post /application" do
       before do
  	@params_create = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
         @params = { 'name' => "appli", "url" => "http://www.julienriby.fr" }
@@ -352,7 +352,7 @@ describe "Connexion Service" do
 
         Application.stub(:create)
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        post '/sauth/application/new', @params
+        post '/applications', @params
       end
       it "should create appli with name set in browser" do
 
@@ -360,7 +360,7 @@ describe "Connexion Service" do
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
          
         @a.name.should == @params['name']
-        post '/sauth/application/new', @params
+        post '/applications', @params
       end
 
       it "should create appli with url set in browser" do
@@ -369,65 +369,65 @@ describe "Connexion Service" do
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
          
         @a.url.should == @params['url']
-        post '/sauth/application/new', @params
+        post '/applications', @params
       end
 
       it "should redirect to /" do
         Application.stub(:create)
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        post '/sauth/application/new', @params
+        post '/applications', @params
         last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
       end
       context "Inscription app is not OK" do
 
-        it "should render /sauth/application/new form if the name is not set" do
+        it "should give /applications form if the name is not set" do
            
            @a.name = ""
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should render /sauth/application/new form if the url is not set" do
+        it "should give /applications form if the url is not set" do
            
            @a.url = ""
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
 
 
-         it "should render /sauth/application/new form if the name and the url are not set" do
+         it "should give /applications form if the name and the url are not set" do
            @a.name = ""
            @a.url = ""
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should render /sauth/application/new form if the url is invalid" do
+        it "should give /applications form if the url is invalid" do
            @a.url = "badurl"
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should render /sauth/application/new form if the name is invalid" do
+        it "should give /applications form if the name is invalid" do
            @a.name = "bad*name"
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should render the registration form if the login is already taken" do
+        it "should give /applications form if the name is already taken" do
            
            at = Application.new
            at.name = "taken"
@@ -439,8 +439,8 @@ describe "Connexion Service" do
            @a.url = "http://www.julien.fr"
            Application.stub(:create)
            Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-           post '/sauth/application/new', @params
-           last_response.body.should match %r{<form action="/sauth/application/new" method="post".*}
+           post '/applications', @params
+           last_response.body.should match %r{<form action="/applications" method="post".*}
 
            at.destroy
          end

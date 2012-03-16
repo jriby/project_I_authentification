@@ -79,17 +79,17 @@ end
 #########################
 # Portail d'inscription d'appli
 #########################
-get '/sauth/application/new' do
+get '/applications/new' do
 
   if current_user
-    erb :"/sauth/application/new"
+    erb :"/applications/new"
   else
     redirect "/session/new"
 
   end
 end
 
-post '/sauth/application/new' do
+post '/applications' do
 
 name = params['name']
 url = params['url']
@@ -106,7 +106,7 @@ uid = @u.id
     redirect "/"
   else
     @error = @a.errors.messages
-    erb :"/sauth/application/new", :locals => {:user => current_user}
+    erb :"/applications/new", :locals => {:user => current_user}
   end
 
 end
