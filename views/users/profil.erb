@@ -18,7 +18,7 @@
             <p><%= @error %></p>
             <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
           <p></p>
-          <a href="/sauth/application/new"> Inscrire une application </a>
+          <a href="/applications/new"> Inscrire une application </a>
           <p></p>
           <a href="/sessions/disconnect"> Deco </a>
 
@@ -34,7 +34,7 @@
              
             <ul>
               <% apps.each do |a| %>
-                <li><%=a.name%>  : <%=a.url%> - <a href="/sauth/application/delete?app=<%=a.id%>">effacer</a> </li>
+                <li><%=a.name%>  : <%=a.url%> - <a href="/application/delete/<%=a.name%>" method="delete">effacer</a> </li>
               <% end %>
             </ul>
             </div>

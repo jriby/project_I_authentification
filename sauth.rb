@@ -22,7 +22,7 @@ end
 #########################
 get '/users/new' do
 
-          erb :"users/new"
+  erb :"users/new"
 
 end
 
@@ -103,7 +103,8 @@ uid = @u.id
   if @a.valid?
     @params_util = { 'utilisation' => {"application" =>  @a, "user" => @u}}
     @utilisation = Utilisation.create(@params_util['utilisation'])
-    redirect "/"
+    @user = current_user
+    redirect "/users/#@user"
   else
     @error = @a.errors.messages
     erb :"/applications/new", :locals => {:user => current_user}
@@ -129,19 +130,35 @@ end
 #########################
 # Destruction de user
 #########################
+get "/users/delete/:login" do
 
-delete "/users/:login" do
+  @user = current_user
 
-  if session["current_user"] == "admin" 
-   u = User.find_by_login(params["login"])
-   u.destroy
+  if @user == "admin" 
+   usr = User.find_by_login(params["login"])
+   puts usr
+   
+   uti = Utilisation.where(:user_id => usr.id)
+   puts uti
+   uti.each do |u|
+     u.destroy
+   end
+   
+   app = Application.where(:user_id => usr.id)
+   puts app
+   app.each do |a|
+     a.destroy
+   end
+
+   usr.destroy
+
    erb :"/sauth/admin"
 
    else
     @error = 'Pas les droits pour supprimer un user'
-    @user = current_user
-    erb :"/index"
+    redirect :"/"
   end
+
 
 end
 
@@ -159,18 +176,17 @@ end
 # Destruction d'appli
 #########################
 
-get "/sauth/application/delete" do
+get "/application/delete/:name" do
 
   if session["current_user"]
     
-    app = Application.find_by_id(params["app"])
+    app = Application.find_by_name(params["name"])
 
     if !app.nil?
       user = User.find_by_login(session["current_user"])
       if app.user_id != user.id
         @user = current_user
-        @error = "Vous n'avez pas les droits : cette application n'est pas a vous"
-        erb :"/index"
+        redirect :"/"
 
       else
         uti = Utilisation.where(:application_id => app.id)
@@ -181,13 +197,12 @@ get "/sauth/application/delete" do
 
         app.destroy
         @user = current_user
-        erb :"/index"
+        redirect :"/users/#@user"
       end
 
     else
-      @error = "Cette application n'existe pas"
       @user = current_user  
-      erb :"/index"
+      redirect :"/"
    end
 
   else

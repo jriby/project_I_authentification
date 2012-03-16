@@ -229,29 +229,29 @@ describe "Connexion Service" do
     describe "get /users" do
 
     before do 
-       u = User.new
-       u.login = "lolo"
-       u.passwd = "pass"    
-       u.save
+       @u = User.new
+       @u.login = "lolo"
+       @u.passwd = "pass"    
+       @u.save
        @params = { 'login' => "lolo", 'passwd' => "pass" }
        post "/sessions", @params
        follow_redirect!
        last_request.path.should == '/'
        last_request.env["rack.session"]["current_user"].should == "lolo"
 
+    end    
+    
+    after do 
+       @u.destroy
     end
       
       it "should get /users" do
 
-          u = User.new
-          u.login = "lolo"
-          u.passwd = "pass"    
-          u.save
-          @params = { 'login' => "lolo", 'passwd' => "pass" }
-          post "/sessions", @params
-          follow_redirect!
-          last_request.path.should == '/'
-          last_request.env["rack.session"]["current_user"].should == "lolo"
+        @params = { 'login' => "lolo", 'passwd' => "pass" }
+        post "/sessions", @params
+        follow_redirect!
+        last_request.path.should == '/'
+        last_request.env["rack.session"]["current_user"].should == "lolo"
 
         get '/users/lolo'
         last_response.should be_ok
@@ -372,13 +372,19 @@ describe "Connexion Service" do
         post '/applications', @params
       end
 
-      it "should redirect to /" do
+      it "should redirect to /users/:login" do
+        @params_con = { 'login' => "log", 'passwd' => "pass" }
+        post "/sessions", @params_con
+        follow_redirect!
+        last_request.path.should == '/'
+        last_request.env["rack.session"]["current_user"].should == "log"
+          
         Application.stub(:create)
         Application.should_receive(:create).with(@params_create['application']).and_return(@a)
         post '/applications', @params
         last_response.should be_redirect
         follow_redirect!
-        last_request.path.should == '/'
+        last_request.path.should == '/users/log'
       end
       context "Inscription app is not OK" do
 
@@ -466,27 +472,54 @@ describe "Connexion Service" do
 #########################
 # Destruction d'appli
 #########################
-    describe "get /sauth/application/delete" do
+    describe "get /application/delete/:name" do
+    
+    before do
+      @u = User.new
+      @u.login = "log"
+      @u.passwd = "pass"    
+      @u.save
+      @a = Application.new
+      @a.name = "atodel"
+      @a.url = "http://atodel.fr"
+      @a.user_id = @u.id    
+      @a.save
+      res = Application.find_by_name("atodel")
+      res.should == @a
+    end
+    after do
+      @u.destroy
+      @a.destroy
+    end
       context "with current user" do
-        it "should get /sauth/application/delete" do
-          u = User.new
-          u.login = "log"
-          u.passwd = "pass"    
-          u.save
+      before do
           @params = { 'login' => "log", 'passwd' => "pass" }
           post "/sessions", @params
           follow_redirect!
           last_request.path.should == '/'
           last_request.env["rack.session"]["current_user"].should == "log"
           
-          get '/sauth/application/delete'
-          last_response.body.should match %r{}
-          u.destroy
+          get '/application/delete/atodel'
+          res = Application.find_by_name("atodel")
+          res.should == nil
+      end
+        
+       it "should get /application/delete/:name and destroy the app" do
+          get '/application/delete/atodel'
+          res = Application.find_by_name("atodel")
+          res.should == nil
         end
+ 
+       it "should get /application/delete/:name and destroy the app" do
+          get '/application/delete/atodel'
+          res = Application.find_by_name("atodel")
+          res.should == nil
+        end
+      
       end
       context "without current user" do
         it "should go to index" do
-          get '/sauth/application/delete'
+          get '/application/delete/appli'
           last_response.body.should match %r{<h1>Acceuil</h1>.*}
         end
       end
@@ -511,7 +544,10 @@ describe "Connexion Service" do
   describe "delete /users/:login" do
     context "Without current user" do
       it "should redirect to /" do
-        delete '/users/lol'
+        get '/users/delete/lol'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'        
         last_response.body.should match %r{<h1>Acceuil</h1>.*}
       end
     end
@@ -528,29 +564,34 @@ describe "Connexion Service" do
 
         @params = { 'login' => "admin", 'passwd' => "pass" }
         post "/sessions", @params
+        last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "admin"
          
-        delete '/users/utodel', :locals => {:login => "utodel"}
+        get '/users/delete/utodel', :locals => {:login => "utodel"}
         udel = User.find_by_login("utodel")
         udel.should == nil
         last_response.body.should match %r{<h1>Admin Page</h1>.*}
         u.destroy
 
       end
-      it "should go to index if the curent user is not admin" do
+      it "should redirect to index if the curent user is not admin" do
         u = User.new
         u.login = "lol"
         u.passwd = "pass"    
         u.save
         @params = { 'login' => "lol", 'passwd' => "pass" }
         post "/sessions", @params
+        last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
         last_request.env["rack.session"]["current_user"].should == "lol"
         
-        delete '/users/lol'
+        get '/users/delete/lol'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'
         last_response.body.should match %r{<h1>Acceuil</h1>.*}        
 
         u.destroy
