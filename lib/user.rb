@@ -1,5 +1,8 @@
+$: << File.dirname(__FILE__)
 require 'active_record'
 require 'digest/sha1'
+require 'application'
+require 'utilisation'
 
 class User < ActiveRecord::Base
 
@@ -11,7 +14,7 @@ class User < ActiveRecord::Base
   validates :passwd, :presence => true
    
   def passwd=(passwd)
-    if !passwd.empty?
+    if !passwd.nil? && !passwd.empty?
     self[:passwd] = User.encrypt_password(passwd)
     else
     self[:passwd] = nil
@@ -27,8 +30,19 @@ end
     !u.nil? && u.passwd == User.encrypt_password(password)
   end
 
+   def self.delete(usr)
+  
+   app = Application.where(:user_id => usr.id)
+   
+     if app != nil
+       app.each do |a|
+         Application.delete(a)
+       end
+     end
 
+   usr.destroy
 
+  end
 
 end
 

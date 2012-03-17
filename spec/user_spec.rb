@@ -13,56 +13,46 @@ end
 
 context "init" do
 
-  describe "With info missing" do
+  describe "With info not missing" do
 
+
+        it "should be valid with a login a passwd" do
+
+		@u.login = "jfunt"
+		@u.passwd = "pass"
+		@u.should be_valid
+
+	end
+
+  describe "With info missing" do
+  before do
+    @u.login = "jriby"
+    @u.passwd = "pass"
+  end
 	it "should not be valid without a passwd" do
 				
-		@u.login = "jriby"
-                @u.is_su = false	
+		@u.passwd = nil	
 		@u.should_not be_valid
 	end
 	
 	it "should not be valid without a login" do
 
-		@u.passwd = "pass"
-                @u.is_su = false			
+		@u.login = nil
+		@u.should_not be_valid
+	end
+
+        it "should not be valid if the login is empty" do
+		@u.login = ""			
 		@u.should_not be_valid
 	end
 
         it "should not be valid if the passwd is empty" do
-                @u.login = "jriby"
-		@u.passwd = ""
-                @u.is_su = false			
+		@u.passwd = ""			
 		@u.should_not be_valid
 	end
 
-	it "should be valid with a login a passwd and is_su" do
-
-		@u.login = "jfunt"
-		@u.passwd = "pass"
-                @u.is_su = false
-		@u.should be_valid
-
-	end
-
   end
-
-  describe "With info not missing" do
-        it "should be valid with a login a passwd and without is_su fixed" do
-
-		@u.login = "jfunt"
-		@u.passwd = "pass"
-		@u.should be_valid
-
-	end
         
-        it "should set is_su at false if it is not fixed" do
-
-		@u.login = "jfunt"
-		@u.passwd = "pass"
-		@u.is_su.should == false
-
-	end
   end
 
   describe "Unicity" do
@@ -177,5 +167,27 @@ before do
 
   end
 end
+
+  describe "Test de la methode delete" do
+
+    it "Should delete the user and all apps of the user" do
+
+      params_user = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
+      user = User.create(params_user['user'])     
+   
+      params_app1 = { 'application' => {"name" => "appli1", "url" => "http://www.julienriby.fr", "user_id" => user.id}}
+      application1 = Application.create(params_app1['application'])
+
+     params_app2 = { 'application' => {"name" => "appli2", "url" => "http://www.juliengoin.fr", "user_id" => user.id}}
+     application2 = Application.create(params_app2['application'])
+
+     User.delete(user)
+     User.find_by_login(user.login).should == nil
+     Application.find_by_name(application1.name).should == nil
+     Application.find_by_name(application2.name).should == nil
+
+    end
+
+  end
 
 end

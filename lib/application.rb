@@ -1,4 +1,6 @@
+$: << File.dirname(__FILE__)
 require 'active_record'
+require 'utilisation'
 
 class Application < ActiveRecord::Base
 
@@ -13,5 +15,19 @@ class Application < ActiveRecord::Base
   validates :url, :format => { :with => /^https?:\/\/[a-z0-9._\/-]+\.[a-z]{2,3}/i, :on => :create }
 
   validates :user_id, :presence => true
+
+
+   def self.delete(appli)
+
+        uti = Utilisation.where(:application_id => appli.id)
+
+        if uti != nil
+          uti.each do |u|
+            u.destroy
+          end
+        end
+
+        appli.destroy
+   end
 
 end

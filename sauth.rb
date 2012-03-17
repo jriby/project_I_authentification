@@ -28,10 +28,10 @@ end
 
 post'/users' do
 
-login = params['login']
-passwd = params['passwd']
+  login = params['login']
+  passwd = params['passwd']
 
-params = { 'user' => {"login" => login, "passwd" => passwd }}
+  params = { 'user' => {"login" => login, "passwd" => passwd }}
 
   @u = User.create(params['user'])
   
@@ -91,10 +91,10 @@ end
 
 post '/applications' do
 
-name = params['name']
-url = params['url']
-@u = User.find_by_login(current_user)
-uid = @u.id
+  name = params['name']
+  url = params['url']
+  @u = User.find_by_login(current_user)
+  uid = @u.id
 
   params = { 'application' => {"name" => name, "url" => url, "user_id" => uid}}
 
@@ -133,26 +133,16 @@ end
 get "/users/delete/:login" do
 
   @user = current_user
+  usr = User.find_by_login(params["login"])
 
   if @user == "admin" 
-   usr = User.find_by_login(params["login"])
-   puts usr
-   
-   uti = Utilisation.where(:user_id => usr.id)
-   puts uti
-   uti.each do |u|
-     u.destroy
-   end
-   
-   app = Application.where(:user_id => usr.id)
-   puts app
-   app.each do |a|
-     a.destroy
-   end
-
-   usr.destroy
-
-   erb :"/sauth/admin"
+    if usr != nil
+      User.delete(usr)
+      erb :"/sauth/admin"
+    else
+       @error = 'User introuvable'
+       redirect :"/"
+     end
 
    else
     @error = 'Pas les droits pour supprimer un user'
@@ -189,13 +179,7 @@ get "/application/delete/:name" do
         redirect :"/"
 
       else
-        uti = Utilisation.where(:application_id => app.id)
-       
-        uti.each do |u|
-          u.destroy
-        end
-
-        app.destroy
+        Application.delete(app)
         @user = current_user
         redirect :"/users/#@user"
       end
