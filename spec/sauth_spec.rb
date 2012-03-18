@@ -244,23 +244,18 @@ describe 'Authenticatin Service' do
       end
 
       context "without good current_user" do
-        it "should return the acceuil" do
+        it "should have error 403" do
           get '/users/momo'
-          last_response.should be_redirect
-          follow_redirect!
-          last_request.path.should == '/'
-          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+          last_response.status.should == 403       
+          last_response.body.should match %r{<h1>Forbiden</h1>.*}
 
         end
       end
       context "without current_user" do
-        it "should return the acceuil" do
+        it "should have error 403" do
           get '/users/momo'
-          last_request.env["rack.session"]["current_user"].should == nil
-          last_response.should be_redirect
-          follow_redirect!
-          last_request.path.should == '/'
-          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+          last_response.status.should == 403       
+          last_response.body.should match %r{<h1>Forbiden</h1>.*}
         end
       end
 
@@ -306,12 +301,10 @@ describe 'Authenticatin Service' do
 
       end
       context "without current user" do
-        it "should redirect to /session/new" do
+        it "should have error 403" do
           get '/applications/new'
-          follow_redirect!
-          last_response.should be_ok
-          last_request.path.should == '/session/new'
-          last_response.body.should match %r{<form action="/sessions" method="post".*}
+          last_response.status.should == 403       
+          last_response.body.should match %r{<h1>Forbiden</h1>.*}
         end
       end
 
@@ -462,23 +455,21 @@ describe 'Authenticatin Service' do
           last_request.path.should == '/users/log'
         end     
 
-      it "should redirect to index if the app doesn't exist" do
+      it "should have error 404 if the app doesn't exist" do
           get '/application/delete/apasexister'
-          last_response.should be_redirect
-          follow_redirect!
-          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.status.should == 404
+        last_response.body.should match %r{<h1>Not Found</h1>.*} 
         end     
       end
       context "without current user" do
-        it "should redirect to index" do
+        it "should have error 403" do
           get '/application/delete/atodel'
-          last_response.should be_redirect
-          follow_redirect!
-          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.status.should == 403       
+        last_response.body.should match %r{<h1>Forbiden</h1>.*}
         end
       end
       context "without user admin of the app" do
-        it "should go to index" do
+        it "should have error 403" do
           @u2 = User.new
           @u2.login = "toto"
           @u2.passwd = "pass"    
@@ -486,10 +477,9 @@ describe 'Authenticatin Service' do
           @params = { 'login' => "toto", 'passwd' => "pass" }
           post "/sessions", @params
           get '/application/delete/atodel'
-          last_response.should be_redirect
-          follow_redirect!
-          last_response.body.should match %r{<h1>Acceuil</h1>.*}
- 
+          last_response.status.should == 403       
+          last_response.body.should match %r{<h1>Forbiden</h1>.*}
+  
           @u2.destroy
         end
       end
@@ -507,12 +497,10 @@ describe 'Authenticatin Service' do
   describe "delete /users/:login" do
 
     context "Without current user" do
-      it "should redirect to /" do
+      it "should have error 403" do
         get '/users/delete/lol'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'        
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.status.should == 403       
+        last_response.body.should match %r{<h1>Forbiden</h1>.*}
       end
     end
 
@@ -539,7 +527,7 @@ describe 'Authenticatin Service' do
 
       end
 
-      it "should redirect to index if the user to del doesn't exist" do
+      it "should have error 404 if the user to del doesn't exist" do
         u = User.new
         u.login = "admin"
         u.passwd = "pass"    
@@ -549,13 +537,11 @@ describe 'Authenticatin Service' do
         post "/sessions", @params
          
         get '/users/delete/utodel'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}  
+        last_response.status.should == 404
+        last_response.body.should match %r{<h1>Not Found</h1>.*}  
 
       end
-      it "should redirect to index if the curent user is not admin" do
+      it "should have error 403 if the curent user is not admin" do
         u = User.new
         u.login = "lol"
         u.passwd = "pass"    
@@ -565,10 +551,8 @@ describe 'Authenticatin Service' do
         
         
         get '/users/delete/utodel'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}        
+        last_response.status.should == 403
+        last_response.body.should match %r{<h1>Forbiden</h1>.*}      
 
         u.destroy
       end
@@ -604,7 +588,7 @@ describe 'Authenticatin Service' do
 
     context "Without current user admin"
 
-      it "should redirect to / if the current user is not the admin" do
+      it "should have error 403 if the current user is not the admin" do
         u = User.new
         u.login = "pasadmin"
         u.passwd = "pass"    
@@ -613,22 +597,18 @@ describe 'Authenticatin Service' do
         post "/sessions", @params
 
         get '/sauth/admin'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'        
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.status.should == 403       
+        last_response.body.should match %r{<h1>Forbiden</h1>.*}
 
         get '/sessions/disconnect'
         u.destroy
       end
 
-      it "should redirect to / if there is no user" do
+      it "should have error 403 if there is no user" do
         get '/sessions/disconnect'
         get '/sauth/admin'
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'        
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.status.should == 403       
+        last_response.body.should match %r{<h1>Forbiden</h1>.*}
       end
     end
   

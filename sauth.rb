@@ -88,10 +88,10 @@ end
 get "/users/:login" do
 
   if session["current_user"] == params[:login]
-  @user = params[:login]
-  erb :"users/profil"
+    @user = params[:login]
+    erb :"users/profil"
   else
-  redirect "/"
+    403
   end
 
 end
@@ -106,8 +106,7 @@ get '/applications/new' do
   if current_user
     erb :"/applications/new"
   else
-    redirect "/session/new"
-
+    403
   end
 end
 
@@ -148,9 +147,7 @@ get "/application/delete/:name" do
     if !app.nil?
       user = User.find_by_login(session["current_user"])
       if app.user_id != user.id
-        @user = current_user
-        redirect :"/"
-
+        403
       else
         Application.delete(app)
         @user = current_user
@@ -158,13 +155,12 @@ get "/application/delete/:name" do
       end
 
     else
-      @user = current_user  
-      redirect :"/"
+      404
    end
 
   else
 
-    redirect "/"
+    403
 
   end
 end
@@ -182,14 +178,12 @@ get "/users/delete/:login" do
     if usr != nil
       User.delete(usr)
       redirect :"/sauth/admin"
-    else
-       
-       redirect :"/"
+    else      
+       404
      end
 
-   else
-    
-    redirect :"/"
+   else    
+    403
   end
 
 
@@ -201,9 +195,8 @@ end
 get "/sauth/admin" do
   @user = current_user
 
-  if @user.nil? || @user != "admin"
-    @error = 'Page Interdite'
-    redirect :"/"
+  if @user.nil? || @user != "admin"    
+    403
   else
     erb :"/sauth/admin"
   end
