@@ -3,15 +3,12 @@ require 'rack/test'
 
 set :sessions, true
 
-describe 'The App' do
+describe 'Authenticatin Service' do
   include Rack::Test::Methods
 
   def app
     Sinatra::Application
   end
-
-
-describe "Authenticatin Service" do
 
 #########################
 #User registration
@@ -25,6 +22,7 @@ describe "Authenticatin Service" do
       it "should get /users/new" do
         get '/users/new'
         last_response.should be_ok
+        last_request.path.should == '/users/new'
          end
 
       it "should return a form to post registration info to /users" do
@@ -37,42 +35,24 @@ describe "Authenticatin Service" do
 #########################
     describe "post /users" do
       before do
-       @params_create = { 'user' => {"login" => "login", "passwd" => "pass" }}
+        @params_create = { 'user' => {"login" => "login", "passwd" => "pass" }}
         @params = { 'login' => "login", "passwd" => "pass" }
       
         @u = User.new
         @u.login = "login"
         @u.passwd = "pass"
+        User.should_receive(:create).with(@params_create['user']).and_return(@u)
       end
 
       it "should use create" do
-
-        User.stub(:create)
-        User.should_receive(:create).with(@params_create['user']).and_return(@u)
+       
         post '/users', @params
+
       end
-
-      it "should create user with login set in browser" do
-
-        User.stub(:create)
-        User.should_receive(:create).with(@params_create['user']).and_return(@u)
-         
-        @u.login.should == @params['login']
-        post '/users', @params
-      end
-
-      it "should create user with passwd encypt set in browser" do
-
-        User.stub(:create)
-        User.should_receive(:create).with(@params_create['user']).and_return(@u)
-        @u.passwd.should == User.encrypt_password(@params['passwd'])
-        post '/users', @params
-      end
-
 
       it "should redirect to /session/new" do
-        User.stub(:create)
-        User.should_receive(:create).with(@params_create['user']).and_return(@u)
+
+   
         post '/users', @params
         last_response.should be_redirect
         follow_redirect!
@@ -84,8 +64,7 @@ describe "Authenticatin Service" do
         it "should render the registration form if the login is not set" do
            
            @u.login = ""
-           User.stub(:create)
-           User.should_receive(:create).with(@params_create['user']).and_return(@u)
+
            post '/users', @params
            last_response.body.should match %r{<form action="/users" method="post".*}
          end
@@ -93,8 +72,7 @@ describe "Authenticatin Service" do
          it "should render the registration form if the pass is not set" do
            
            @u.passwd = ""
-           User.stub(:create)
-           User.should_receive(:create).with(@params_create['user']).and_return(@u)
+
            post '/users', @params
            last_response.body.should match %r{<form action="/users" method="post".*}
          end
@@ -104,8 +82,7 @@ describe "Authenticatin Service" do
            
            @u.login = ""
            @u.passwd = ""
-           User.stub(:create)
-           User.should_receive(:create).with(@params_create['user']).and_return(@u)
+
            post '/users', @params
            last_response.body.should match %r{<form action="/users" method="post".*}
          end
@@ -119,8 +96,8 @@ describe "Authenticatin Service" do
 
            @u.login = "taken"
            @u.passwd = "taken"
-           User.stub(:create)
-           User.should_receive(:create).with(@params_create['user']).and_return(@u)
+
+
            post '/users', @params
            last_response.body.should match %r{<form action="/users" method="post".*}
 
@@ -130,12 +107,12 @@ describe "Authenticatin Service" do
       end
 
     end
-end
+  end
 
 #########################
 #Connexion Service
 #########################
-describe "Connexion Service" do
+  describe "Connexion Service" do
 
 #########################
 #get /sauth/session/new
@@ -160,15 +137,15 @@ describe "Connexion Service" do
       end
 
       it "Should use user is present" do
-        User.stub(:user_is_present)
+
         User.should_receive(:user_is_present).with("login", "pass")
         post '/sessions', @params
 
 
       end
 
-      it "Should redirect to the user page if the log and pass is prensent" do
-        User.stub(:user_is_present)
+      it "Should redirect to the user page if the log and pass is present" do
+
         User.should_receive(:user_is_present).with("login", "pass").and_return(true)
         post '/sessions', @params
         last_response.should be_redirect
@@ -176,36 +153,45 @@ describe "Connexion Service" do
         last_request.path.should == '/'
       end
 
+      it "Should set a session" do
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post "/sessions", @params
+        last_request.env["rack.session"]["current_user"].should == "login"
+ 
+      end
+
       context "Connexion is not OK" do
 
-      it "Should return the connexion form if the log and pass is not prensent" do
-        User.stub(:user_is_present)
+      it "Should return the connexion form if user_is_present return false" do    
         User.should_receive(:user_is_present).with("login", "pass").and_return(false)
         post '/sessions', @params
         last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
 
-      it "Should return the connexion form if the log is not given" do
-        @params['login']="" 
-        User.stub(:user_is_present)
-        User.should_receive(:user_is_present).with("", "pass").and_return(false)
-        post '/sessions', @params
-        last_response.body.should match %r{<form action="/sessions" method="post".*}
-      end
-
-      it "Should return the connexion form if the pass is not given" do
-        @params['passwd']=""
-        User.stub(:user_is_present)
-        User.should_receive(:user_is_present).with("login", "").and_return(false)
-        post '/sessions', @params
-        last_response.body.should match %r{<form action="/sessions" method="post".*}
-      end
 
       end
     end
 
+    describe "get /sessions/disconnect" do
+      before do
+        @params = { 'login' => "login", "passwd" => "pass" }
+     
+      end
+
+      it "Should diconnect and redirect to /session/new" do
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post "/sessions", @params
+        last_request.env["rack.session"]["current_user"].should == "login"
+        get '/sessions/disconnect'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/session/new'
+        last_request.env["rack.session"]["current_user"].should == nil
+      end    
+    end
   end 
 
+  describe "Index and user pages" do
 #########################
 #get /
 #########################
@@ -226,41 +212,35 @@ describe "Connexion Service" do
 #########################
 #get /users/:login
 #########################
-    describe "get /users" do
+    describe "get /users/:login" do
 
     before do 
        @u = User.new
        @u.login = "lolo"
        @u.passwd = "pass"    
        @u.save
-       @params = { 'login' => "lolo", 'passwd' => "pass" }
-       post "/sessions", @params
-       follow_redirect!
-       last_request.path.should == '/'
-       last_request.env["rack.session"]["current_user"].should == "lolo"
-
     end    
     
     after do 
        @u.destroy
     end
-      
-      it "should get /users" do
+      context "with current_user" do
+        before do
+          @params = { 'login' => "lolo", 'passwd' => "pass" }
+          post "/sessions", @params
 
-        @params = { 'login' => "lolo", 'passwd' => "pass" }
-        post "/sessions", @params
-        follow_redirect!
-        last_request.path.should == '/'
-        last_request.env["rack.session"]["current_user"].should == "lolo"
+        end
+        it "should get /users" do
 
-        get '/users/lolo'
-        last_response.should be_ok
-        last_request.path.should == '/users/lolo'
+          get '/users/lolo'
+          last_response.should be_ok
+          last_request.path.should == '/users/lolo'
          end
 
-      it "should return the user page" do
-        get '/users/lolo'
-        last_response.body.should match %r{<h1>Profil User</h1>.*}
+        it "should return the user page" do
+          get '/users/lolo'
+          last_response.body.should match %r{<h1>Profil User</h1>.*}
+        end
       end
 
       context "without good current_user" do
@@ -275,7 +255,6 @@ describe "Connexion Service" do
       end
       context "without current_user" do
         it "should return the acceuil" do
-          get '/sessions/disconnect'
           get '/users/momo'
           last_request.env["rack.session"]["current_user"].should == nil
           last_response.should be_redirect
@@ -286,7 +265,7 @@ describe "Connexion Service" do
       end
 
     end
-
+  end
 
 
 #########################
@@ -294,28 +273,40 @@ describe "Connexion Service" do
 #########################
   describe "App registration" do
 #########################
-#get /sauth/application/new
+#get /applications/new
 #########################
     describe "get /applications/new" do
       context "with current user" do
-        it "should return a form to post registration info to /applications" do
-          u = User.new
-          u.login = "log"
-          u.passwd = "pass"    
-          u.save
-          @params = { 'login' => "log", 'passwd' => "pass" }
-          post "/sessions", @params
-          follow_redirect!
-          last_request.path.should == '/'
-          last_request.env["rack.session"]["current_user"].should == "log"
+      before do
+        @u = User.new
+        @u.login = "log"
+        @u.passwd = "pass"    
+        @u.save
+        @params = { 'login' => "log", 'passwd' => "pass" }
+        post "/sessions", @params
+      end
+      after do
+        @u.destroy
+      end
+
+       it "should get /applications/new" do
+                  
+          get '/applications/new'
+          last_response.should be_ok
+          last_request.path.should == '/applications/new'
           
+        end
+
+        it "should return a form to post registration info to /applications" do
+                  
           get '/applications/new'
           last_response.body.should match %r{<form action="/applications" method="post".*}
-          u.destroy
+     
         end
+
       end
       context "without current user" do
-        it "should return a form to post connexion info to /session/new" do
+        it "should redirect to /session/new" do
           get '/applications/new'
           follow_redirect!
           last_response.should be_ok
@@ -325,10 +316,11 @@ describe "Connexion Service" do
       end
 
     end
+
 #########################
-#post /sauth/application/new
+#post /applications
 #########################
-    describe "post /application" do
+    describe "post /applications" do
       before do
  	@params_create = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
         @params = { 'name' => "appli", "url" => "http://www.julienriby.fr" }
@@ -348,92 +340,70 @@ describe "Connexion Service" do
         User.stub(:id).and_return("01")
       end
 
-     it "should use create" do
+      context "Inscription app is OK" do
+      
+        before do
+          Application.should_receive(:create).with(@params_create['application']).and_return(@a)
+        end
 
-        Application.stub(:create)
-        Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        post '/applications', @params
+        it "should use create" do
+           
+          post '/applications', @params
+
+        end
+
+        it "should redirect to /users/:login" do
+          @params_con = { 'login' => "log", 'passwd' => "pass" }
+          post "/sessions", @params_con
+ 
+          post '/applications', @params
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.path.should == '/users/log'
+        end
+
       end
-      it "should create appli with name set in browser" do
 
-        Application.stub(:create)
-        Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-         
-        @a.name.should == @params['name']
-        post '/applications', @params
-      end
-
-      it "should create appli with url set in browser" do
-
-        Application.stub(:create)
-        Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-         
-        @a.url.should == @params['url']
-        post '/applications', @params
-      end
-
-      it "should redirect to /users/:login" do
-        @params_con = { 'login' => "log", 'passwd' => "pass" }
-        post "/sessions", @params_con
-        follow_redirect!
-        last_request.path.should == '/'
-        last_request.env["rack.session"]["current_user"].should == "log"
-          
-        Application.stub(:create)
-        Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        post '/applications', @params
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/users/log'
-      end
       context "Inscription app is not OK" do
-
-        it "should give /applications form if the name is not set" do
+        before do
+          Application.should_receive(:create).with(@params_create['application']).and_return(@a)
+        end
+        it "should give /applications/new form if the name is not set" do
            
-           @a.name = ""
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
+           @a.name = ""          
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should give /applications form if the url is not set" do
+        it "should give /applications/new form if the url is not set" do
            
            @a.url = ""
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
 
 
-         it "should give /applications form if the name and the url are not set" do
+         it "should give /applications/new form if the name and the url are not set" do
            @a.name = ""
            @a.url = ""
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should give /applications form if the url is invalid" do
+        it "should give /applications/new form if the url is invalid" do
            @a.url = "badurl"
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should give /applications form if the name is invalid" do
+        it "should give /applications/new form if the name is invalid" do
            @a.name = "bad*name"
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
 
-        it "should give /applications form if the name is already taken" do
+        it "should give /applications/new form if the name is already taken" do
            
            at = Application.new
            at.name = "taken"
@@ -443,8 +413,6 @@ describe "Connexion Service" do
 
            @a.name = "taken"
            @a.url = "http://www.julien.fr"
-           Application.stub(:create)
-           Application.should_receive(:create).with(@params_create['application']).and_return(@a)
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
 
@@ -455,19 +423,6 @@ describe "Connexion Service" do
     end
   end
   
-  describe "Connexion Service" do
-
-#########################
-#get /sauth/admin
-#########################
-    describe "get /sauth/admin" do
-      
-      it "should get /sauth/admin" do
-        get '/sauth/admin'
-        last_response.should be_ok
-         end
-    end
-  end
 
 #########################
 # Destruction d'appli
@@ -480,12 +435,11 @@ describe "Connexion Service" do
       @u.passwd = "pass"    
       @u.save
       @a = Application.new
+      @a.id = 1
       @a.name = "atodel"
       @a.url = "http://atodel.fr"
       @a.user_id = @u.id    
       @a.save
-      res = Application.find_by_name("atodel")
-      res.should == @a
     end
     after do
       @u.destroy
@@ -495,45 +449,54 @@ describe "Connexion Service" do
       before do
           @params = { 'login' => "log", 'passwd' => "pass" }
           post "/sessions", @params
-          follow_redirect!
-          last_request.path.should == '/'
-          last_request.env["rack.session"]["current_user"].should == "log"
-          
-          get '/application/delete/atodel'
-          res = Application.find_by_name("atodel")
-          res.should == nil
+
       end
         
-       it "should get /application/delete/:name and destroy the app" do
+       it "should use delete in @a and redirect to /users/log" do
           get '/application/delete/atodel'
-          res = Application.find_by_name("atodel")
-          res.should == nil
-        end
- 
-       it "should get /application/delete/:name and destroy the app" do
-          get '/application/delete/atodel'
-          res = Application.find_by_name("atodel")
-          res.should == nil
-        end
-      
+          #Application.should_receive(:delete)
+          adel = Application.find_by_name("utodel")
+          adel.should == nil
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.path.should == '/users/log'
+        end     
+
+      it "should redirect to index if the app doesn't exist" do
+          get '/application/delete/apasexister'
+          last_response.should be_redirect
+          follow_redirect!
+          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        end     
       end
       context "without current user" do
-        it "should go to index" do
-          get '/application/delete/appli'
+        it "should redirect to index" do
+          get '/application/delete/atodel'
+          last_response.should be_redirect
+          follow_redirect!
           last_response.body.should match %r{<h1>Acceuil</h1>.*}
         end
       end
+      context "without user admin of the app" do
+        it "should go to index" do
+          @u2 = User.new
+          @u2.login = "toto"
+          @u2.passwd = "pass"    
+          @u2.save
+          @params = { 'login' => "toto", 'passwd' => "pass" }
+          post "/sessions", @params
+          get '/application/delete/atodel'
+          last_response.should be_redirect
+          follow_redirect!
+          last_response.body.should match %r{<h1>Acceuil</h1>.*}
+ 
+          @u2.destroy
+        end
+      end
+
   end
 
-#########################
-# Portail d'admin users
-#########################
-  describe "get /sauth/admin" do
-    it "should get /sauth/admin" do
-       get '/sauth/admin'
-       last_response.should be_ok
-      end
-    end
+
 
 
 #########################
@@ -542,6 +505,7 @@ describe "Connexion Service" do
 
 
   describe "delete /users/:login" do
+
     context "Without current user" do
       it "should redirect to /" do
         get '/users/delete/lol'
@@ -551,6 +515,7 @@ describe "Connexion Service" do
         last_response.body.should match %r{<h1>Acceuil</h1>.*}
       end
     end
+
     context "With current user" do
       it "should delete the user if the curent user is admin" do
         u = User.new
@@ -564,16 +529,30 @@ describe "Connexion Service" do
 
         @params = { 'login' => "admin", 'passwd' => "pass" }
         post "/sessions", @params
+         
+        get '/users/delete/utodel'
+        udel = User.find_by_login("utodel")
+        udel.should == nil
+        last_response.should be_redirect
+        follow_redirect!
+        last_response.body.should match %r{<h1>Admin Page</h1>.*}
+
+      end
+
+      it "should redirect to index if the user to del doesn't exist" do
+        u = User.new
+        u.login = "admin"
+        u.passwd = "pass"    
+        u.save
+
+        @params = { 'login' => "admin", 'passwd' => "pass" }
+        post "/sessions", @params
+         
+        get '/users/delete/utodel'
         last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
-        last_request.env["rack.session"]["current_user"].should == "admin"
-         
-        get '/users/delete/utodel', :locals => {:login => "utodel"}
-        udel = User.find_by_login("utodel")
-        udel.should == nil
-        last_response.body.should match %r{<h1>Admin Page</h1>.*}
-        u.destroy
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}  
 
       end
       it "should redirect to index if the curent user is not admin" do
@@ -583,12 +562,9 @@ describe "Connexion Service" do
         u.save
         @params = { 'login' => "lol", 'passwd' => "pass" }
         post "/sessions", @params
-        last_response.should be_redirect
-        follow_redirect!
-        last_request.path.should == '/'
-        last_request.env["rack.session"]["current_user"].should == "lol"
         
-        get '/users/delete/lol'
+        
+        get '/users/delete/utodel'
         last_response.should be_redirect
         follow_redirect!
         last_request.path.should == '/'
@@ -599,6 +575,62 @@ describe "Connexion Service" do
     end
   end
 
-end
+#########################
+# Portail d'admin users
+#########################
+  describe "get /sauth/admin" do
+    context "With current user admin"
+    before do
+      @u = User.new
+      @u.login = "admin"
+      @u.passwd = "pass"    
+      @u.save
+      @params = { 'login' => "admin", 'passwd' => "pass" }
+      post "/sessions", @params
+    end
+    after do
+      get '/sessions/disconnect'
+      @u.destroy
+    end
+      it "should get /sauth/admin" do
+        get '/sauth/admin'
+        last_response.should be_ok
+        last_request.path.should == '/sauth/admin'
+      end
+      it "should return the admin page" do
+        get '/sauth/admin'
+        last_response.body.should match %r{<h1>Admin Page</h1>.*}   
+      end
+
+    context "Without current user admin"
+
+      it "should redirect to / if the current user is not the admin" do
+        u = User.new
+        u.login = "pasadmin"
+        u.passwd = "pass"    
+        u.save
+        @params = { 'login' => "pasadmin", 'passwd' => "pass" }
+        post "/sessions", @params
+
+        get '/sauth/admin'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'        
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+
+        get '/sessions/disconnect'
+        u.destroy
+      end
+
+      it "should redirect to / if there is no user" do
+        get '/sessions/disconnect'
+        get '/sauth/admin'
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/'        
+        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+      end
+    end
+  
 end
 

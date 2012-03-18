@@ -66,15 +66,37 @@ post '/sessions' do
 
 end
 
+#########################
+# Deco
+#########################
+get '/sessions/disconnect' do
+   disconnect
+   redirect "/session/new"
+end
+
+#########################
+# Index
+#########################
 get "/" do
   @user = current_user
   erb :"/index"
 end
 
-get '/sessions/disconnect' do
-   disconnect
-   redirect "/session/new"
+#########################
+# Profile utilisateur
+#########################
+get "/users/:login" do
+
+  if session["current_user"] == params[:login]
+  @user = params[:login]
+  erb :"users/profil"
+  else
+  redirect "/"
+  end
+
 end
+
+
 
 #########################
 # Portail d'inscription d'appli
@@ -112,55 +134,6 @@ post '/applications' do
 
 end
 
-#########################
-# Profile utilisateur
-#########################
-get "/users/:login" do
-
-  if session["current_user"] == params[:login]
-  @user = params[:login]
-  erb :"users/profil"
-  else
-  redirect "/"
-  end
-
-end
-
-
-#########################
-# Destruction de user
-#########################
-get "/users/delete/:login" do
-
-  @user = current_user
-  usr = User.find_by_login(params["login"])
-
-  if @user == "admin" 
-    if usr != nil
-      User.delete(usr)
-      erb :"/sauth/admin"
-    else
-       @error = 'User introuvable'
-       redirect :"/"
-     end
-
-   else
-    @error = 'Pas les droits pour supprimer un user'
-    redirect :"/"
-  end
-
-
-end
-
-#########################
-# Portail d'admin users
-#########################
-get "/sauth/admin" do
-  @user = current_user
-  erb :"/sauth/admin"
-
-end
-
 
 #########################
 # Destruction d'appli
@@ -191,9 +164,60 @@ get "/application/delete/:name" do
 
   else
 
-    erb :"/index"
+    redirect "/"
 
   end
+end
+
+
+#########################
+# Destruction de user
+#########################
+get "/users/delete/:login" do
+
+  @user = current_user
+  usr = User.find_by_login(params["login"])
+
+  if @user == "admin" 
+    if usr != nil
+      User.delete(usr)
+      redirect :"/sauth/admin"
+    else
+       
+       redirect :"/"
+     end
+
+   else
+    
+    redirect :"/"
+  end
+
+
+end
+
+#########################
+# Portail d'admin users
+#########################
+get "/sauth/admin" do
+  @user = current_user
+
+  if @user.nil? || @user != "admin"
+    @error = 'Page Interdite'
+    redirect :"/"
+  else
+    erb :"/sauth/admin"
+  end
+
+end
+
+#########################
+# Error
+#########################
+error 403 do
+   erb :forbidden
+end
+error 404 do
+   erb :notfound
 end
 
 

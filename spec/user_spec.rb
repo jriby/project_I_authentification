@@ -144,31 +144,45 @@ context "init" do
 
   end
 
-  describe "Test de la methode user_is_present" do
+  describe "Test of method user_is_present" do
 before do
         @params = { 'user' => {"login" => "jgoin", "passwd" => "pass" }}
     end
 
     it "Should use find_by_login" do
-        User.stub(:find_by_login)
+
         User.should_receive(:find_by_login).with('jriby')
         User.user_is_present('jriby', 'pass')
     end
 
-    it "Should be valid if the user is present" do
+    it "Should return true if the user is present" do
         @user = User.create(@params['user'])
         User.user_is_present('jgoin', 'pass').should be_true
         @user.destroy
     end
 
-    it "Should not be valid if the user is not present" do
-      User.user_is_present('looool', 'pass').should be_false
-    end
+    context "will return false"
+      it "Should not be valid if the user is not present" do
+        User.user_is_present('looool', 'pass').should be_false
+      end
+ 
+      it "Should not be valid if the user is not given" do
+        User.user_is_present(nil, 'pass').should be_false
+      end
+
+      it "Should not be valid if the pass is not given" do
+        User.user_is_present('looool', nil).should be_false
+      end
+
+      it "Should not be valid if the login and the pass is not given" do
+        User.user_is_present(nil, nil).should be_false
+      end
+
 
   end
 end
 
-  describe "Test de la methode delete" do
+  describe "Test of method delete" do
 
     it "Should delete the user and all apps of the user" do
 
