@@ -15,7 +15,19 @@ end
   end
 
 
+#########################
 # Index
+#########################
 get '/' do
   erb :index
+end
+
+
+#########################
+# Protected
+#########################
+get '/protected' do
+
+  erb :protected
+
 end
