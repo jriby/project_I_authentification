@@ -611,6 +611,111 @@ describe 'Authenticatin Service' do
         last_response.body.should match %r{<h1>Forbiden</h1>.*}
       end
     end
-  
+ #########################
+#Connexion Service with app
+#########################
+  describe "Connexion Service with app" do
+
+#########################
+#get /app/session/new
+#########################
+    describe "get /app1/session/new" do
+      context "With good app" do
+      before do
+	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
+        @application = Application.create(params['application'])
+      end
+      after do
+        @application.destroy
+      end
+        it "should get /app1/session/new" do
+          get '/app1/session/new?origin=/'
+          last_response.should be_ok
+        end
+
+        it "should return a form to post registration info to /app1/sessions" do
+          get '/app1/session/new?origin=/'
+          last_response.body.should match %r{<form action="/app1/sessions" method="post".*}
+        end
+      end
+      context "With bad info" do
+        it "should return body app1 existe pas ou origin pas fixee if app1 doesn't exist" do
+          get '/app1/session/new?origin=/'
+          last_response.body.should match %r{app1 existe pas ou origin pas fixee}
+        end
+
+        it "should return body app1 existe pas ou origin pas fixee if origin is not set" do
+          get '/app1/session/new'
+          last_response.body.should match %r{app1 existe pas ou origin pas fixee}
+        end
+      end
+    end
+
+    describe "post /:appli/sessions" do
+      before do
+        @params = { 'login' => "login", "passwd" => "pass", 'back_url' => "http://www.julienriby:6001/protected" }
+	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
+        @application = Application.create(params['application'])
+      end
+      after do
+        @application.destroy
+      end
+
+      it "Should use user is present" do
+
+        User.should_receive(:user_is_present).with("login", "pass")
+        post '/app1/sessions', @params
+
+      end
+
+     it "Should use utilisation is present" do
+        params_user = { 'user' => {"login" => "login", "passwd" => "pass" }}
+        user = User.create(params_user['user'])
+        Utilisation.should_receive(:utilisation_is_present).with(user, @application)
+        post '/app1/sessions', @params
+        user.destroy
+      end
+
+      it "Should redirect to the user page if the log and pass is present" do
+        Utilisation.should_receive(:utilisation_is_present).and_return(true)
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post '/app1/sessions', @params
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
+      end
+
+      it "Should set a session" do
+        Utilisation.should_receive(:utilisation_is_present).and_return(true)
+        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        post '/app1/sessions', @params
+        last_request.env["rack.session"]["current_user"].should == "login"
+ 
+      end
+
+      context "Utilisation is present return false" do
+
+        it "Should redirect to the user page if the log and pass is present" do
+          Utilisation.should_receive(:utilisation_is_present).and_return(false)
+          User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+          post '/app1/sessions', @params
+          last_response.should be_redirect
+          follow_redirect!
+          last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
+        end
+
+
+
+      end
+      context "User is present return false" do
+
+        it "Should return the connexion form if user_is_present return false" do    
+          User.should_receive(:user_is_present).with("login", "pass").and_return(false)
+          post '/app1/sessions', @params
+          last_response.body.should match %r{<h1>Portail de connection</h1>.*}
+        end
+      end
+    end
+  end
 end
 

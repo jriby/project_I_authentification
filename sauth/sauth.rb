@@ -5,6 +5,8 @@ require 'lib/application'
 require 'lib/utilisation'
 require 'spec/spec_helper'
 
+set :port, 6666
+
 enable :sessions
 
 helpers do
@@ -214,5 +216,38 @@ error 404 do
 end
 
 
+get '/:appli/session/new' do
 
+  if Application.application_is_present(params[:appli]) && !params[:origin].nil?
+    a = Application.find_by_name(params[:appli])
+    @appli=params[:appli]
+    @back_url=a.url+params[:origin]
+    erb :"session/appli"
+  else
+    "#{params[:appli]} existe pas ou origin pas fixee"
+  end
+end
 
+post '/:appli/sessions' do
+
+  if User.user_is_present(params['login'],params['passwd'])
+
+    user = User.find_by_login(params[:login])
+    appl = Application.find_by_name(params[:appli])
+
+    login=params["login"]
+    session["current_user"]=login    
+
+    if !Utilisation.utilisation_is_present(user, appl)
+      params_util = { 'utilisation' => {"application" => appl, "user" => user}}
+      Utilisation.create(params_util['utilisation'])
+    end
+
+    redirect "#{params[:back_url]}?login=#{params[:login]}&secret=jesuisauth"
+  else
+    @back_url=params[:back_url]
+    @error_con = "Les infos saisies sont incorrectes" 
+    @appli=params[:appli]
+    erb :"session/appli"
+  end
+end
