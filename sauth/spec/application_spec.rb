@@ -11,6 +11,20 @@ context "init" do
 
   describe "With good infos" do
     it "should be valid with a name, an url (http) and a user" do
+	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => 01}}
+          @application = Application.create(@params['application'])
+          @application.should be_valid
+          @application.destroy
+	end
+
+    it "should be valid with a name, an url, a port, and a user" do
+	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby:6001", "user_id" => 01}}
+          @application = Application.create(@params['application'])
+          @application.should be_valid
+          @application.destroy
+	end
+
+        it "should be valid with a name, an url with .fr, and a user" do
 	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
           @application = Application.create(@params['application'])
           @application.should be_valid
@@ -18,7 +32,7 @@ context "init" do
 	end
 
 	it "should be valid with a name, an url (https) and a user" do
-	  @params = { 'application' => {"name" => "appli", "url" => "https://www.julienriby.fr", "user_id" => 01}}
+	  @params = { 'application' => {"name" => "appli", "url" => "https://www.julienriby", "user_id" => 01}}
           @application = Application.create(@params['application'])
           @application.should be_valid
           @application.destroy
@@ -29,7 +43,7 @@ context "init" do
   describe "With info missing" do
 
 	it "should not be valid without a name" do
-          @params = { 'application' => {"url" => "http://www.julienriby.fr", "user_id" => "01"}}
+          @params = { 'application' => {"url" => "http://www.julienriby", "user_id" => "01"}}
           @application = Application.create(@params['application'])
           @application.errors.messages[:name].include?("is invalid").should be_true
 
@@ -43,13 +57,13 @@ context "init" do
 	end
 
         it "should not be valid without a user_id" do
-          @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr"}}
+          @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby"}}
           @application = Application.create(@params['application'])
           @application.errors.messages[:user_id].include?("can't be blank").should be_true         
 	end
 
         it "should not be valid if the name is empty" do
-	  @params = { 'application' => {"name" => "", "url" => "http://www.julienriby.fr"}}
+	  @params = { 'application' => {"name" => "", "url" => "http://www.julienriby"}}
           @application = Application.create(@params['application'])
           @application.errors.messages[:name].include?("can't be blank").should be_true	
 	end
@@ -61,7 +75,7 @@ context "init" do
 	end
         
         it "should not be valid if the user_id is empty" do
-	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => ""}}
+	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => ""}}
           @application = Application.create(@params['application'])
           @application.errors.messages[:user_id].include?("can't be blank").should be_true	
 	end
@@ -88,10 +102,10 @@ context "init" do
 
 	it "should have a name unique" do
 		
-	  @params1 = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
+	  @params1 = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => 01}}
           @application1 = Application.create(@params1['application'])
 
-	  @params2 = { 'application' => {"name" => "appli", "url" => "http://www.julien.fr", "user_id" => 02}}
+	  @params2 = { 'application' => {"name" => "appli", "url" => "http://www.julien", "user_id" => 02}}
           @application2 = Application.create(@params1['application'])
 
           @application2.errors.messages[:name].include?("has already been taken").should be_true	
@@ -110,7 +124,7 @@ context "init" do
         @params_user2 = { 'user' => {"login" => "jgoin", "passwd" => "pass" }}
         @user2 = User.create(@params_user2['user'])
 
-        @params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => @user1.id}}
+        @params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => @user1.id}}
         @application = Application.create(@params_app['application'])
 
         @params_util1 = { 'utilisation' => {"application" =>  @application, "user" => @user1}}
