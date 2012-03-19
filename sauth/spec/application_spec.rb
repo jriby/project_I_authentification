@@ -139,6 +139,32 @@ context "init" do
 
       end
   end
-end
 
+  describe "Test of method application_is_present" do
+  before do
+    @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => 01}}
+  end
+
+    it "Should use find_by_name" do
+      Application.should_receive(:find_by_name).with('appli')
+      Application.application_is_present('appli')
+    end
+
+    it "Should return true if the application is present" do
+      @application = Application.create(@params['application'])
+      Application.application_is_present('appli').should be_true
+      @application.destroy
+    end
+
+    context "will return false"
+
+      it "Should not be valid if the application is not present" do
+        Application.application_is_present('appli').should be_false
+      end
+ 
+      it "Should not be valid if the application is not given" do
+        Application.application_is_present(nil).should be_false
+      end
+    end
+  end
 end

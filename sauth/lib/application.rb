@@ -30,4 +30,9 @@ class Application < ActiveRecord::Base
         appli.destroy
    end
 
+  def self.application_is_present(name)
+    a = Application.find_by_name(name)
+    !a.nil?
+  end
+
 end
