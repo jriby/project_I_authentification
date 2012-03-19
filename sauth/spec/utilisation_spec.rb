@@ -56,4 +56,60 @@ describe Utilisation do
 
   end
 
+  describe "Test de is_present" do
+    before do
+        @params_user = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
+	@params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
+    end
+    
+
+    it "Should return true if the utilisation is present" do
+
+        @application = Application.create(@params_app['application'])
+        @user = User.create(@params_user['user'])
+
+        @params_util = { 'utilisation' => {"application" =>  @application, "user" => @user}}
+        @utilisation = Utilisation.create(@params_util['utilisation'])
+
+        Utilisation.utilisation_is_present(@user, @application).should be_true
+        @utilisation.destroy
+        @application.destroy
+        @user.destroy
+
+    end
+
+
+
+    context "will return false" do
+    before do
+      @params_user = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
+      @params_app = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
+      @application = Application.create(@params_app['application'])
+      @user = User.create(@params_user['user'])
+    end
+    after do
+      @application.destroy
+      @user.destroy
+    end
+      it "Should return false if the utilisation is not present" do
+        Utilisation.utilisation_is_present(@user, @application).should be_false
+    end
+ 
+      it "Should not be valid if the user is not given" do
+        Utilisation.utilisation_is_present(nil, @application).should be_false
+      end
+
+      it "Should not be valid if the application is not given" do
+        Utilisation.utilisation_is_present(@user, nil).should be_false
+      end
+
+      it "Should not be valid if the login and the application is not given" do
+        Utilisation.utilisation_is_present(nil, nil).should be_false 
+      end
+
+
+  end
+
+  end
+
 end

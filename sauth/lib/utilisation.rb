@@ -9,5 +9,16 @@ class Utilisation < ActiveRecord::Base
 
   validates :application_id, :presence => true
 
+  def self.utilisation_is_present(user, appli)
+    
+    if user.nil? || appli.nil?
+      false
+    else
+      userid = user.id
+      appliid = appli.id
+      Utilisation.where(:user_id => userid, :application_id => appliid) != []
+    end
+  end
+
 
 end
