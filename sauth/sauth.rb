@@ -267,6 +267,7 @@ post '/:appli/sessions' do
 
     redirect "#{params[:back_url]}?login=#{params[:login]}&secret=jesuisauth"
   else
+    @login = params['login']
     @back_url=params[:back_url]
     @error_con = "Les infos saisies sont incorrectes" 
     @appli=params[:appli]
