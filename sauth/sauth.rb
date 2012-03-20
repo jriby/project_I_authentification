@@ -220,13 +220,26 @@ end
 
 get '/:appli/session/new' do
 
-  if Application.application_is_present(params[:appli]) && !params[:origin].nil?
-    a = Application.find_by_name(params[:appli])
-    @appli=params[:appli]
-    @back_url=a.url+params[:origin]
-    erb :"session/appli"
+  if Application.application_is_present(params[:appli])
+  
+    if current_user 
+      a = Application.find_by_name(params[:appli])
+      log = session["current_user"]
+      url=a.url+params[:origin]
+
+      redirect "#{url}?login=#{log}&secret=jesuisauth"
+  
+    elsif !params[:origin].nil?
+      a = Application.find_by_name(params[:appli])
+      @appli=params[:appli]
+      @back_url=a.url+params[:origin]
+      erb :"session/appli"
+    else
+      404
+    end
+
   else
-    "#{params[:appli]} existe pas ou origin pas fixee"
+    404
   end
 end
 

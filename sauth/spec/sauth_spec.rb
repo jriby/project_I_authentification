@@ -637,16 +637,35 @@ describe 'Authenticatin Service' do
           get '/app1/session/new?origin=/'
           last_response.body.should match %r{<form action="/app1/sessions" method="post".*}
         end
-      end
-      context "With bad info" do
-        it "should return body app1 existe pas ou origin pas fixee if app1 doesn't exist" do
-          get '/app1/session/new?origin=/'
-          last_response.body.should match %r{app1 existe pas ou origin pas fixee}
-        end
 
-        it "should return body app1 existe pas ou origin pas fixee if origin is not set" do
-          get '/app1/session/new'
-          last_response.body.should match %r{app1 existe pas ou origin pas fixee}
+        context "With current user" do
+          it "Should redirect to the user page if the log and pass is present" do
+            u = User.new
+            u.login = "pasadmin"
+            u.passwd = "pass"    
+            u.save
+            @params = { 'login' => "pasadmin", 'passwd' => "pass" }
+            post "/sessions", @params
+
+            get '/app1/session/new?origin=/protected'
+            last_response.should be_redirect
+            follow_redirect!
+            last_request.url.should == 'http://www.julienriby:6001/protected?login=pasadmin&secret=jesuisauth'
+          end
+        end
+      
+        context "With bad info" do
+          it "should return 404 if app1 doesn't exist" do
+            get '/appdontexist/session/new?origin=/'
+            last_response.status.should == 404
+            last_response.body.should match %r{<h1>Not Found</h1>}
+          end
+
+          it "should return 404 if origin is not set" do
+            get '/app1/session/new'
+            last_response.status.should == 404
+            last_response.body.should match %r{<h1>Not Found</h1>}
+          end
         end
       end
     end
