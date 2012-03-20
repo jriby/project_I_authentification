@@ -3,11 +3,12 @@
 <head>
   <title>Profil</title>
 </head>
-<body>
+<body style="font: 13px Arial, sans-serif; background: rgb(240,240,240);">
+<center>
 
 <h1>Profil User</h1>
         
-
+<div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
 	  <p>Bonjour <%= @user %> </p>
             <p><%= @error %></p>
             <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
@@ -24,7 +25,7 @@
           %>
  
            <div class="listappown">
-             <p>List de vos applications</p>
+             <p>Liste de vos applications</p>
              
             <ul>
               <% apps.each do |a| %>
@@ -41,7 +42,7 @@
               if !utils.empty?
             %>
             <div class="listappuse">
-            <p>Listes des application que vous pouvez utiliser</p>
+            <p>Liste des application que vous pouvez utiliser</p>
               <ul>
                 <% utils.each do |util| %>
                   <% app = Application.find_by_id(util.application_id) %>
@@ -53,6 +54,7 @@
            <%else%>
              <p>Vous n'utilisez aucune application</p>
            <%end%>
-
+</div>
+</center>
 </body>
 </html>

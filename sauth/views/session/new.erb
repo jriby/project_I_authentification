@@ -3,14 +3,14 @@
 <head>
   <title>Portail de connexion</title>
 </head>
-<body>
-
+<body style="font: 13px Arial, sans-serif; background: rgb(240,240,240);">
+<center>
 <h1>Portail de connexion</h1>
 
-<% if @error_con.nil? %>
-		<p >Saisir votre login et votre mot de passe pour vous connecter</p>
 
-<% else %>
+		<p >Saisir votre login et votre mot de passe pour vous connecter</p>
+<div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
+<% if !@error_con.nil? %>
 
 <%= @error_con %>
 
@@ -35,7 +35,8 @@
 <p></p>
 <p>Pas encore inscrit? </p>
           <a href="/users/new"> Inscription </a>
-
+</div>
+</center>
 </body>
 </html>
 

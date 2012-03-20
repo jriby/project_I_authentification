@@ -22,7 +22,7 @@ describe 'Authenticatin Service' do
       it "should get /users/new" do
         get '/users/new'
         last_response.should be_ok
-        last_request.path.should == '/users/new'
+        #last_request.path.should == '/users/new'
          end
 
       it "should return a form to post registration info to /users" do
@@ -205,7 +205,7 @@ describe 'Authenticatin Service' do
 
       it "should return the index page" do
         get '/'
-        last_response.body.should match %r{<h1>Acceuil</h1>.*}
+        last_response.body.should match %r{<h1>Acceuil du sauth</h1>.*}
          end
     end
 
@@ -731,7 +731,7 @@ describe 'Authenticatin Service' do
         it "Should return the connexion form if user_is_present return false" do    
           User.should_receive(:user_is_present).with("login", "pass").and_return(false)
           post '/app1/sessions', @params
-          last_response.body.should match %r{<h1>Portail de connection</h1>.*}
+          last_response.body.should match %r{<h1>Portail de Connexion</h1>.*}
         end
       end
     end

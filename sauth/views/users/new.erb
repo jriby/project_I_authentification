@@ -3,21 +3,22 @@
 <head>
   <title>Portail d'inscription</title>
 </head>
-<body>
+<body style="font: 13px Arial, sans-serif; background: rgb(240,240,240);">
+<center>
 
 <h1>Portail d'inscription</h1>
 
-<% if @u.nil? %>
-		<p >Saisir un login et un mot de passe pour s'inscrire</p>
 
-<% else %>
+		<p >Saisir un login et un mot de passe pour s'inscrire</p>
+<div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
+<% if !@u.nil? %>
 	<p >Les informations saisies sont incorrects</p>
 
-
+<ul>
 <% @error.each do |champ, mess| %>
-<%= champ %> : <%= mess.join(', ') %>
+<li><%= champ %> : <%= mess.join(':') %></li>
 <% end %>
-
+</ul>
 
 <% end %>
 
@@ -38,7 +39,8 @@
 </form>
  
          <a href="/"> Retourner à l'acceuil </a>
-
+</div>
+</center>
 </body>
 </html>
 

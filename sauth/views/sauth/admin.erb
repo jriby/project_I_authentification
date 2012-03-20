@@ -3,10 +3,11 @@
 <head>
   <title>Admin users</title>
 </head>
-<body>
+<body style="font: 13px Arial, sans-serif; background: rgb(240,240,240);">
+<center>
 
 <h1>Admin Page</h1>
-        
+<div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">        
 
           
           <p>Vous êtes le grand maître du sauth </p>
@@ -15,7 +16,7 @@
          <% users = User.all%>
 
            <div class="listappown">
-             <p>List des users</p>
+             <p>Liste des utilisateurs</p>
              
             <ul>
               <% users.each do |u| %> 
@@ -28,6 +29,7 @@
             </div>
 
         
-
+</div>
+</center>
 </body>
 </html>
