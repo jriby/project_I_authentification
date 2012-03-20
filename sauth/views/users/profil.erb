@@ -42,7 +42,7 @@
               if !utils.empty?
             %>
             <div class="listappuse">
-            <p>Liste des application que vous pouvez utiliser</p>
+            <p>Liste des application que vous avez utilisees</p>
               <ul>
                 <% utils.each do |util| %>
                   <% app = Application.find_by_id(util.application_id) %>
