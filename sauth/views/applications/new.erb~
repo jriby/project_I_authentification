@@ -33,7 +33,7 @@
     <input id="url" name="url" size="30" type="text" />
   </div>
   <div class="actions">
-    <input name="commit" type="submit" value="Enregistrer" />
+    <input name="commit" type="Enregistrer" value="Register" />
 
   </div>
 </form>
