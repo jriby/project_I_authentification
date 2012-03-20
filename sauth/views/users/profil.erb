@@ -6,14 +6,7 @@
 <body>
 
 <h1>Profil User</h1>
-        
-        <% if @user.nil? %>
-          <p>Bonjour, Veuillez vous connecter </p>
-          <a href="/session/new"> Connection </a>
-          <p>Pas encore inscrit? </p>
-          <a href="/users/new"> Inscription </a>
-        <% else %>
-          
+                
 	  <p>Bonjour <%= @user %> </p>
             <p><%= @error %></p>
             <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
@@ -59,7 +52,6 @@
            <%else%>
              <p>Vous n'utilisez aucune application</p>
            <%end%>
-        <% end %>
 
 </body>
 </html>
