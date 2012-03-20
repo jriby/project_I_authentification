@@ -21,7 +21,7 @@
   <div class="field">
     <label for="session_login">Login</label><br />
 
-    <input id="login" name="login" size="30" type="text" />
+    <input id="login" name="login" size="30" type="text"  value="<%= if !@login.nil?; @login end %>" />
   </div>
   <div class="field">
     <label for="passwd">Mot de passe</label><br />

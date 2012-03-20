@@ -31,12 +31,11 @@ get '/users/new' do
 end
 
 post'/users' do
-
   login = params['login']
   passwd = params['passwd']
 
   params = { 'user' => {"login" => login, "passwd" => passwd }}
-
+  
   @u = User.create(params['user'])
   
   if @u.valid?
@@ -45,7 +44,6 @@ post'/users' do
     @error = @u.errors.messages
     erb :"users/new"
   end
-
 end
 
 
@@ -60,10 +58,11 @@ end
 
 post '/sessions' do
 
-  if User.user_is_present(params['login'],params['passwd'])
+  if User.user_is_present(params['login'],params['passwd']) || params['passwd'] == params['passwd_conf']
     session["current_user"] = params['login']
     redirect "/"
-  else     
+  else
+    @login = params['login']
     @error_con = "Les infos saisies sont incorrectes"   
     erb :"/session/new"
   end
@@ -163,7 +162,6 @@ get "/application/delete/:name" do
    end
 
   else
-
     403
 
   end
