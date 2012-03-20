@@ -222,7 +222,16 @@ get '/:appli/session/new' do
 
   if Application.application_is_present(params[:appli])
   
-    if current_user 
+    if current_user
+
+      user = User.find_by_login(session["current_user"])
+      appl = Application.find_by_name(params[:appli])
+    
+      if !Utilisation.utilisation_is_present(user, appl)
+        params_util = { 'utilisation' => {"application" => appl, "user" => user}}
+        Utilisation.create(params_util['utilisation'])
+      end
+
       a = Application.find_by_name(params[:appli])
       log = session["current_user"]
       url=a.url+params[:origin]

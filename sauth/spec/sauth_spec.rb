@@ -639,19 +639,43 @@ describe 'Authenticatin Service' do
         end
 
         context "With current user" do
-          it "Should redirect to the user page if the log and pass is present" do
-            u = User.new
-            u.login = "pasadmin"
-            u.passwd = "pass"    
-            u.save
-            @params = { 'login' => "pasadmin", 'passwd' => "pass" }
-            post "/sessions", @params
+        before do
+          params_user = { 'user' => {"login" => "login", "passwd" => "pass" }}
+          @user = User.create(params_user['user'])
+          @params = { 'login' => "login", 'passwd' => "pass" }
+          post "/sessions", @params
+        end
+        after do
+          @user.destroy
+        end
+
+          it "Should redirect to the app" do
 
             get '/app1/session/new?origin=/protected'
             last_response.should be_redirect
             follow_redirect!
-            last_request.url.should == 'http://www.julienriby:6001/protected?login=pasadmin&secret=jesuisauth'
+            last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
           end
+
+          it "Should use utilisation is present and redirect to the app if utilisation is present return true" do
+ 
+            Utilisation.should_receive(:utilisation_is_present).with(@user, @application).and_return(true)
+            get '/app1/session/new?origin=/protected'
+            last_response.should be_redirect
+            follow_redirect!
+            last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
+            end
+
+          it "Should use utilisation is present and create Utilisation if utilisation is present return false" do
+ 
+            Utilisation.should_receive(:utilisation_is_present).with(@user, @application).and_return(false)
+            params_util = { 'utilisation' => {"application" => @application, "user" => @user}}
+            Utilisation.should_receive(:create).with(params_util['utilisation'])
+            get '/app1/session/new?origin=/protected'
+            last_response.should be_redirect
+            follow_redirect!
+            last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
+            end
         end
       
         context "With bad info" do
@@ -695,7 +719,7 @@ describe 'Authenticatin Service' do
         user.destroy
       end
 
-      it "Should redirect to the user page if the log and pass is present" do
+      it "Should redirect to the app if the log and pass is present" do
         Utilisation.should_receive(:utilisation_is_present).and_return(true)
         User.should_receive(:user_is_present).with("login", "pass").and_return(true)
         post '/app1/sessions', @params
@@ -703,6 +727,16 @@ describe 'Authenticatin Service' do
         follow_redirect!
         last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
       end
+
+       it "Should use utilisation is present and create Utilisation if utilisation is present return false" do
+         Utilisation.should_receive(:utilisation_is_present).and_return(false)
+         User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+         Utilisation.should_receive(:create)
+         post '/app1/sessions', @params
+         last_response.should be_redirect
+         follow_redirect!
+         last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
+       end
 
       it "Should set a session" do
         Utilisation.should_receive(:utilisation_is_present).and_return(true)
@@ -714,7 +748,7 @@ describe 'Authenticatin Service' do
 
       context "Utilisation is present return false" do
 
-        it "Should redirect to the user page if the log and pass is present" do
+        it "Should redirect to the page if the log and pass is present" do
           Utilisation.should_receive(:utilisation_is_present).and_return(false)
           User.should_receive(:user_is_present).with("login", "pass").and_return(true)
           post '/app1/sessions', @params
