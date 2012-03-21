@@ -1,10 +1,10 @@
-require '../sauth'
-require 'rack/test'
+require 'spec_helper'
+
 
 set :sessions, true
 
 describe 'Authenticatin Service' do
-  include Rack::Test::Methods
+
 
   def app
     Sinatra::Application

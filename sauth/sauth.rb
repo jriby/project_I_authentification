@@ -4,12 +4,15 @@ require 'lib/user'
 require 'lib/application'
 require 'lib/utilisation'
 require 'spec/spec_helper'
+require 'logger'
 
 set :port, 6666
 
 use Rack::Session::Cookie, :key => 'rack.session',
                            :expire_after => 86400, #1 jour
                            :secret => 'super_user'
+
+set :logger , Logger.new('log/log_sessions.txt', 'weekly')
 
 helpers do
   def current_user
@@ -58,7 +61,8 @@ end
 
 post '/sessions' do
 
-  if User.user_is_present(params['login'],params['passwd']) || params['passwd'] == params['passwd_conf']
+  if User.user_is_present(params['login'],params['passwd'])
+    settings.logger.info("Connexion depuis le sauth de => "+params["login"])
     session["current_user"] = params['login']
     redirect "/"
   else
@@ -221,19 +225,18 @@ get '/:appli/session/new' do
   if Application.application_is_present(params[:appli])
   
     if current_user
-
       user = User.find_by_login(session["current_user"])
       appl = Application.find_by_name(params[:appli])
     
       if !Utilisation.utilisation_is_present(user, appl)
+        settings.logger.info("Lutilisateur "+user.login+" sest inscrit a lapplication "+appl.name)
         params_util = { 'utilisation' => {"application" => appl, "user" => user}}
         Utilisation.create(params_util['utilisation'])
       end
 
-      a = Application.find_by_name(params[:appli])
       log = session["current_user"]
-      url=a.url+params[:origin]
-
+      url=appl.url+params[:origin]
+      settings.logger.info("L'utilisateur "+user.login+" utilise l'application "+appl.name)
       redirect "#{url}?login=#{log}&secret=jesuisauth"
   
     elsif !params[:origin].nil?
@@ -261,10 +264,11 @@ post '/:appli/sessions' do
     session["current_user"]=login    
 
     if !Utilisation.utilisation_is_present(user, appl)
+      settings.logger.info("L'utilisateur "+login+" utilise l'application "+params[:appli])
       params_util = { 'utilisation' => {"application" => appl, "user" => user}}
       Utilisation.create(params_util['utilisation'])
     end
-
+    settings.logger.info("Lutilisateur "+login+" utilise lapplication "+params[:appli])
     redirect "#{params[:back_url]}?login=#{params[:login]}&secret=jesuisauth"
   else
     @login = params['login']
