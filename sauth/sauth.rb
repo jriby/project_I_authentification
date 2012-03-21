@@ -68,7 +68,8 @@ post '/sessions' do
     redirect "/"
   else
     @login = params['login']
-    @error_con = "Les infos saisies sont incorrectes"   
+    @error_con = "Les infos saisies sont incorrectes"
+    settings.logger.info("Tentative de connexion failed pour "+params['login'])   
     erb :"/sessions/new"
   end
 
@@ -230,7 +231,7 @@ get '/:appli/sessions/new' do
       appl = Application.find_by_name(params[:appli])
     
       if !Utilisation.utilisation_is_present(user, appl)
-        settings.logger.info("Lutilisateur "+user.login+" sest inscrit a lapplication "+appl.name)
+        settings.logger.info("L'utilisateur "+user.login+" s'est inscrit a l'application "+appl.name)
         params_util = { 'utilisation' => {"application" => appl, "user" => user}}
         Utilisation.create(params_util['utilisation'])
       end
@@ -265,17 +266,18 @@ post '/:appli/sessions' do
     session["current_user"]=login    
 
     if !Utilisation.utilisation_is_present(user, appl)
-      settings.logger.info("L'utilisateur "+login+" utilise l'application "+params[:appli])
+      settings.logger.info("L'utilisateur "+login+" inscrit a l'application "+params[:appli])
       params_util = { 'utilisation' => {"application" => appl, "user" => user}}
       Utilisation.create(params_util['utilisation'])
     end
-    settings.logger.info("Lutilisateur "+login+" utilise lapplication "+params[:appli])
+    settings.logger.info("L'utilisateur "+login+" utilise l'application "+params[:appli])
     redirect "#{params[:back_url]}?login=#{params[:login]}&secret=jesuisauth"
   else
     @login = params['login']
     @back_url=params[:back_url]
     @error_con = "Les infos saisies sont incorrectes" 
     @appli=params[:appli]
+    settings.logger.info("Tentative de connexion failed pour "+params['login'])
     erb :"sessions/appli"
   end
 end
