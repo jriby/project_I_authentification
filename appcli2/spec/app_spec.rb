@@ -15,7 +15,7 @@ describe 'app' do
 
     it "should return the index page" do
       get '/'
-      last_response.body.should match %r{<h1>App cli 2</h1>.*}
+      last_response.body.should match %r{<h1 style="color: rgb\(240,240,240\)">App cli 2</h1>.*}
      end
   end
 
@@ -38,7 +38,7 @@ describe 'app' do
     end
       it "should redirect to protected" do      
           get '/protected', @params
-          last_response.body.should match %r{<h1>Page privee appli cli 2</h1>.*}
+          last_response.body.should match %r{<h1 style="color: rgb\(240,240,240\)">Page privee appli cli 2</h1>.*}
       end
       it "should set the session" do      
           get '/protected', @params
@@ -61,7 +61,7 @@ describe 'app' do
 
       it "should return the private page" do
         get '/protected'
-        last_response.body.should match %r{<h1>Page privee appli cli 2</h1>.*}
+        last_response.body.should match %r{<h1 style="color: rgb\(240,240,240\)">Page privee appli cli 2</h1>.*}
       end
     end
 
