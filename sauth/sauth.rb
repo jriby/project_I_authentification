@@ -9,9 +9,9 @@ require 'bdd/database'
 
 set :port, 6666
 
-use Rack::Session::Cookie, :key => 'rack.session',
+use Rack::Session::Cookie, :key => 'rack.session.sauth',
                            :expire_after => 86400, #1 jour
-                           :secret => 'super_user'
+                           :secret => 'hey'
 
 set :logger , Logger.new('log/log_sessions.txt', 'weekly')
 

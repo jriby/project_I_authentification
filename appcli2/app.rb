@@ -4,9 +4,9 @@ require 'sinatra'
 
 set :port, 6002
 
-use Rack::Session::Cookie, :key => 'rack.session',
+use Rack::Session::Cookie, :key => 'rack.session.app2',
                            :expire_after => 86400, #1 jour
-                           :secret => 'super_user'
+                           :secret => 'hey'
 
 helpers do
   def current_user
