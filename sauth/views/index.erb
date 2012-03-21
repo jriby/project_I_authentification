@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Acceuil</title>
 </head>
-<body>
 
-<h1>Acceuil</h1>
-        
+<body style="font: 13px Arial, sans-serif; background: rgb(240,240,240);">
+<center>
+<h1>Acceuil du sauth</h1>
+
+<div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
         <% if @user.nil? %>
           <p>Bonjour, Veuillez vous connecter </p>
-          <a href="/session/new"> Connection </a>
+          <a href="/sessions/new"> Connexion </a>
           <p>Pas encore inscrit? </p>
           <a href="/users/new"> Inscription </a>
         <% else %>
@@ -23,5 +26,7 @@
             <p></p>
             <a href="/sessions/disconnect"> Deco </a>
         <% end %>
+</div>
+</center>
 </body>
 </html>

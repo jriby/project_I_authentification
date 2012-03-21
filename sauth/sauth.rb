@@ -3,8 +3,9 @@ require 'sinatra'
 require 'lib/user'
 require 'lib/application'
 require 'lib/utilisation'
-require 'spec/spec_helper'
+require 'active_record'
 require 'logger'
+require 'bdd/database'
 
 set :port, 6666
 
@@ -42,7 +43,7 @@ post'/users' do
   @u = User.create(params['user'])
   
   if @u.valid?
-    redirect '/session/new'
+    redirect '/sessions/new'
   else
     @error = @u.errors.messages
     erb :"users/new"
@@ -53,9 +54,9 @@ end
 #########################
 # Portail de connection
 #########################
-get '/session/new' do
+get '/sessions/new' do
           
-          erb :"session/new"
+          erb :"sessions/new"
 
 end
 
@@ -68,7 +69,7 @@ post '/sessions' do
   else
     @login = params['login']
     @error_con = "Les infos saisies sont incorrectes"   
-    erb :"/session/new"
+    erb :"/sessions/new"
   end
 
 end
@@ -78,7 +79,7 @@ end
 #########################
 get '/sessions/disconnect' do
    disconnect
-   redirect "/session/new"
+   redirect "/sessions/new"
 end
 
 #########################
@@ -220,7 +221,7 @@ error 404 do
 end
 
 
-get '/:appli/session/new' do
+get '/:appli/sessions/new' do
 
   if Application.application_is_present(params[:appli])
   
@@ -243,7 +244,7 @@ get '/:appli/session/new' do
       a = Application.find_by_name(params[:appli])
       @appli=params[:appli]
       @back_url=a.url+params[:origin]
-      erb :"session/appli"
+      erb :"sessions/appli"
     else
       404
     end
@@ -275,6 +276,6 @@ post '/:appli/sessions' do
     @back_url=params[:back_url]
     @error_con = "Les infos saisies sont incorrectes" 
     @appli=params[:appli]
-    erb :"session/appli"
+    erb :"sessions/appli"
   end
 end

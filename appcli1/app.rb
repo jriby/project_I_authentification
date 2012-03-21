@@ -5,7 +5,7 @@ require 'sinatra'
 set :port, 6001
 
 use Rack::Session::Cookie, :key => 'rack.session',
-                           :expire_after => 86400,
+                           :expire_after => 86400, #1 jour
                            :secret => 'super_user'
 
 helpers do
@@ -35,7 +35,7 @@ get '/protected' do
   #j'ai pas de cookie ds app
   elsif params['secret'].nil?
     #Pas de secret donc ce n'est pas une rep de sauth
-    redirect 'http://localhost:6666/app1/session/new?origin=/protected'
+    redirect 'http://localhost:6666/app1/sessions/new?origin=/protected'
     elsif params['secret']=="jesuisauth" && !params['login'].nil?
       #L'auth est OK
       session["current_user_app1"] = params['login']

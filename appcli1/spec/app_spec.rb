@@ -29,7 +29,7 @@ describe 'app' do
           get '/protected'
           last_response.should be_redirect
           follow_redirect!
-          last_request.url.should == 'http://localhost:6666/app1/session/new?origin=%2Fprotected'
+          last_request.url.should == 'http://localhost:6666/app1/sessions/new?origin=%2Fprotected'
       end
     end
     context "Reponse du sauth" do
