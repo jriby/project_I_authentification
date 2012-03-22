@@ -32,7 +32,7 @@ describe 'app' do
           last_request.url.should == 'http://sauth:6666/app1/sessions/new?origin=%2Fprotected'
       end
     end
-    context "Reponse du sauth" do
+    context "Response of sauth" do
     before do
               @params = { 'secret' => "jesuisauth", "login" => "log"}
     end

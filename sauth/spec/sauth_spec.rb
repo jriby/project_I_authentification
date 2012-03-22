@@ -416,7 +416,10 @@ describe 'Authenticatin Service' do
     end
   end
   
-
+ #########################
+#Destruction
+#########################
+  describe "Destroy app or user" do
 #########################
 # Destruction d'appli
 #########################
@@ -483,9 +486,7 @@ describe 'Authenticatin Service' do
           @u2.destroy
         end
       end
-
-  end
-
+    end
 
 
 
@@ -558,7 +559,11 @@ describe 'Authenticatin Service' do
       end
     end
   end
-
+ 
+ #########################
+#Connexion Service with app
+#########################
+  describe "Admin of the sauth" do
 #########################
 # Portail d'admin users
 #########################
@@ -585,6 +590,7 @@ describe 'Authenticatin Service' do
         get '/sauth/admin'
         last_response.body.should match %r{<h1>Admin Page</h1>.*}   
       end
+    end
 
     context "Without current user admin"
 
@@ -611,6 +617,7 @@ describe 'Authenticatin Service' do
         last_response.body.should match %r{<h1>Forbiden</h1>.*}
       end
     end
+  end
  #########################
 #Connexion Service with app
 #########################

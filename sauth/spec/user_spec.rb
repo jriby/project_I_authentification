@@ -96,8 +96,11 @@ context "init" do
     end
 
   end
+end
 
-  describe "Test de create" do
+
+describe "Tests of methods" do
+  describe "Test of create" do
     before do
         @params = { 'user' => {"login" => "jriby", "passwd" => "pass" }}
     end
@@ -162,6 +165,7 @@ before do
     end
 
     context "will return false"
+
       it "Should not be valid if the user is not present" do
         User.user_is_present('looool', 'pass').should be_false
       end
@@ -203,5 +207,5 @@ end
     end
 
   end
-
 end
+

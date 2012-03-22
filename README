@@ -69,12 +69,14 @@ Julien RIBY
             └── profil.erb
 
 ------------------------------------------------------------------------------------
-Lancer les rspec du sauth et ses librairies
+Lancer les rspec du sauth et ses lib
 ------------------------------------------------------------------------------------
+0. Avoir une bdd vide (la bdd sera dans le même état après les tests)
 1. cd sauth
 2. rspec spec/* --format documentation
 
 Vous devez avoir :
+
 
 Application
   init
@@ -93,15 +95,15 @@ Application
     With bad info
       should not be valid with a bad url (http://.. ou https:// 
       should not be valid with a bad name (other char than a-z0-9_-) 
-    Unicity
-      should have a name unique
-    Test de la methode delete
-      Should delete appli and utilisations of appli
-    Test of method application_is_present
-      Should use find_by_name
-      Should return true if the application is present
-      Should not be valid if the application is not present
-      Should not be valid if the application is not given
+  Unicity
+    should have a name unique
+  Test of method delete
+    Should delete appli and utilisations of appli
+  Test of method application_is_present
+    Should use find_by_name
+    Should return true if the application is present
+    Should not be valid if the application is not present
+    Should not be valid if the application is not given
 
 Authenticatin Service
   User registration
@@ -158,26 +160,28 @@ Authenticatin Service
         should give /applications/new form if the url is invalid
         should give /applications/new form if the name is invalid
         should give /applications/new form if the name is already taken
-  get /application/delete/:name
-    with current user
-      should use delete in @a and redirect to /users/log
-      should have error 404 if the app doesn't exist
-    without current user
-      should have error 403
-    without user admin of the app
-      should have error 403
-  delete /users/:login
-    Without current user
-      should have error 403
-    With current user
-      should delete the user if the curent user is admin
-      should have error 404 if the user to del doesn't exist
-      should have error 403 if the curent user is not admin
-  get /sauth/admin
-    should get /sauth/admin
-    should return the admin page
-    should have error 403 if the current user is not the admin
-    should have error 403 if there is no user
+  Destroy app or user
+    get /application/delete/:name
+      with current user
+        should use delete in @a and redirect to /users/log
+        should have error 404 if the app doesn't exist
+      without current user
+        should have error 403
+      without user admin of the app
+        should have error 403
+    delete /users/:login
+      Without current user
+        should have error 403
+      With current user
+        should delete the user if the curent user is admin
+        should have error 404 if the user to del doesn't exist
+        should have error 403 if the curent user is not admin
+    Admin of the sauth
+      should have error 403 if the current user is not the admin
+      should have error 403 if there is no user
+      get /sauth/admin
+        should get /sauth/admin
+        should return the admin page
   Connexion Service with app
     get /app1/sessions/new
       With good app
@@ -215,7 +219,8 @@ User
     Test passwd
       Should call the encryption sha1
       Should encrypt the pass
-    Test de create
+  Tests of methods
+    Test of create
       User is valid
         Should create the user
       User is not valid
@@ -247,6 +252,9 @@ Utilisation
       Should not be valid if the application is not given
       Should not be valid if the login and the application is not given
 
+Finished in 9.98 seconds
+104 examples, 0 failures
+
 ------------------------------------------------------------------------------------
 Lancer les rspec de app1
 ------------------------------------------------------------------------------------
@@ -262,7 +270,7 @@ app
   get /protected
     Without session
       should redirect to the sauth
-    Reponse du sauth
+    Response of sauth
       should redirect to protected
       should set the session
     With session
@@ -286,7 +294,7 @@ app
   get /protected
     Without session
       should redirect to the sauth
-    Reponse du sauth
+    Response of sauth
       should redirect to protected
       should set the session
     With session
@@ -446,3 +454,45 @@ Tester les applications
 ------------------------------------------------------------------------------------
 
 
+
+////////////////
+Redirection
+////////////////
+ 
+        0. être déconnecté du sauth
+	1. Se connecter à l'appli cliente 1 : http://app:6001
+        2. Allez à la page privée
+        -----> Pas de cookie dans app1 donc vous êtes redirigé vers le sauth
+        3. Se logger
+        -----> Vous êtes redirigé vers l'appli
+
+        Vous pouvez allez de la page privé à la page public sans être redirigé car il y a un cookie pour l'app 1
+
+////////////////
+Redirection transparente
+////////////////
+ 
+        0. être logguer sur sauth
+	1. Se connecter à l'appli cliente 2 : http://app:6002
+        2. Allez à la page privée
+        -----> Pas de cookie dans app2 donc vous êtes redirigé vers le sauth mais étant déja connecté vous êtes redirigé sur l'app
+
+	A noter qu'après ces deux manip, vous pouvez aller à la page de votre profil sur le sauth pour voir les apps 
+        utilisées par votre compte
+
+------------------------------------------------------------------------------------
+Les plus
+------------------------------------------------------------------------------------
+
+	1. Expiration de session : votre session expire dans 1 jour
+        2. Journalisation : Aller dans sauth/log/log_sessions.txt
+
+------------------------------------------------------------------------------------
+Secu
+------------------------------------------------------------------------------------
+
+1. Toutes les page qui necessite une auth ne sont pas accessibles sans être logguer même en les entrant en dur dans l'url (erreur 403)
+2. Toutes les pages introuvables (go to profil avec user innexistant ou utiliser une app pas dans le sauth) retourne l'erreur 404
+
+
+		ENJOY !!!
