@@ -13,13 +13,13 @@
           <p>Vous êtes le grand maître du sauth </p>
           <a href="/"> Retourner à l'acceuil </a>
 
-         <% users = User.all%>
+         <% @users = User.all%>
 
            <div class="listappown">
              <p>Liste des utilisateurs</p>
              
             <ul>
-              <% users.each do |u| %> 
+              <% @users.each do |u| %> 
                 <%if u.login != "admin"%>
                    
                   <li><%=u.login%> - <a href="/users/delete/<%= u.login%>"" >Supprimer</a> </li>

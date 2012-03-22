@@ -97,7 +97,10 @@ end
 get "/users/:login" do
 
   if session["current_user"] == params[:login]
-    @user = params[:login]
+    @u = User.find_by_login(params[:login])
+    uid = @u.id
+    @apps = Application.where(:user_id => uid)
+    @utils = Utilisation.where(:user_id => uid)
     erb :"users/profil"
   else
     403
@@ -206,6 +209,7 @@ get "/sauth/admin" do
   if @user.nil? || @user != "admin"    
     403
   else
+    @users = User.all
     erb :"/sauth/admin"
   end
 
