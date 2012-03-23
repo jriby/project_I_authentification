@@ -35,7 +35,7 @@ get '/protected' do
   #j'ai pas de cookie ds app
   elsif params['secret'].nil?
     #Pas de secret donc ce n'est pas une rep de sauth
-    redirect 'http://sauth:6666/app2/sessions/new?origin=/protected'
+    redirect 'http://sauth:6666/sessions/new/app/app2?origin=/protected'
     elsif params['secret']=="jesuisauth" && !params['login'].nil?
       #L'auth est OK
       session["current_user_app2"] = params['login']

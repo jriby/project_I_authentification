@@ -624,9 +624,9 @@ describe 'Authenticatin Service' do
   describe "Connexion Service with app" do
 
 #########################
-#get /app/sessions/new
+#get /sessions/new/app/:appli
 #########################
-    describe "get /app1/sessions/new" do
+    describe "get /sessions/new/app/app1" do
       context "With good app" do
       before do
 	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
@@ -635,14 +635,14 @@ describe 'Authenticatin Service' do
       after do
         @application.destroy
       end
-        it "should get /app1/sessions/new" do
-          get '/app1/sessions/new?origin=/'
+        it "should get /sessions/new/app/app1" do
+          get '/sessions/new/app/app1?origin=/'
           last_response.should be_ok
         end
 
         it "should return a form to post registration info to /app1/sessions" do
-          get '/app1/sessions/new?origin=/'
-          last_response.body.should match %r{<form action="/app1/sessions" method="post".*}
+          get '/sessions/new/app/app1?origin=/'
+          last_response.body.should match %r{<form action="/sessions/app/app1" method="post".*}
         end
 
         context "With current user" do
@@ -658,7 +658,7 @@ describe 'Authenticatin Service' do
 
           it "Should redirect to the app" do
 
-            get '/app1/sessions/new?origin=/protected'
+            get '/sessions/new/app/app1?origin=/protected'
             last_response.should be_redirect
             follow_redirect!
             last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -667,7 +667,7 @@ describe 'Authenticatin Service' do
           it "Should use utilisation is present and redirect to the app if utilisation is present return true" do
  
             Utilisation.should_receive(:present?).with(@user, @application).and_return(true)
-            get '/app1/sessions/new?origin=/protected'
+            get '/sessions/new/app/app1?origin=/protected'
             last_response.should be_redirect
             follow_redirect!
             last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -678,7 +678,7 @@ describe 'Authenticatin Service' do
             Utilisation.should_receive(:present?).with(@user, @application).and_return(false)
             params_util = { 'utilisation' => {"application" => @application, "user" => @user}}
             Utilisation.should_receive(:create).with(params_util['utilisation'])
-            get '/app1/sessions/new?origin=/protected'
+            get '/sessions/new/app/app1?origin=/protected'
             last_response.should be_redirect
             follow_redirect!
             last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -687,13 +687,14 @@ describe 'Authenticatin Service' do
       
         context "With bad info" do
           it "should return 404 if app1 doesn't exist" do
-            get '/appdontexist/sessions/new?origin=/'
+            Application.should_receive(:present?).and_return(false)
+            get '/sessions/new/app/app1?origin=/'
             last_response.status.should == 404
             last_response.body.should match %r{<h1>Not Found</h1>}
           end
 
           it "should return 404 if origin is not set" do
-            get '/app1/sessions/new'
+            get '/sessions/new/app/app1'
             last_response.status.should == 404
             last_response.body.should match %r{<h1>Not Found</h1>}
           end
@@ -701,7 +702,7 @@ describe 'Authenticatin Service' do
       end
     end
 
-    describe "post /:appli/sessions" do
+    describe "post /sessions/app/:appli" do
       before do
         @params = { 'login' => "login", "passwd" => "pass", 'back_url' => "http://www.julienriby:6001/protected" }
 	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
@@ -714,7 +715,7 @@ describe 'Authenticatin Service' do
       it "Should use user is present" do
 
         User.should_receive(:present?).with("login", "pass")
-        post '/app1/sessions', @params
+        post '/sessions/app/app1', @params
 
       end
 
@@ -722,14 +723,14 @@ describe 'Authenticatin Service' do
         params_user = { 'user' => {"login" => "login", "passwd" => "pass" }}
         user = User.create(params_user['user'])
         Utilisation.should_receive(:present?).with(user, @application)
-        post '/app1/sessions', @params
+        post '/sessions/app/app1', @params
         user.destroy
       end
 
       it "Should redirect to the app if the log and pass is present" do
         Utilisation.should_receive(:present?).and_return(true)
         User.should_receive(:present?).with("login", "pass").and_return(true)
-        post '/app1/sessions', @params
+        post '/sessions/app/app1', @params
         last_response.should be_redirect
         follow_redirect!
         last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -739,7 +740,7 @@ describe 'Authenticatin Service' do
          Utilisation.should_receive(:present?).and_return(false)
          User.should_receive(:present?).with("login", "pass").and_return(true)
          Utilisation.should_receive(:create)
-         post '/app1/sessions', @params
+         post '/sessions/app/app1', @params
          last_response.should be_redirect
          follow_redirect!
          last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -748,7 +749,7 @@ describe 'Authenticatin Service' do
       it "Should set a session" do
         Utilisation.should_receive(:present?).and_return(true)
         User.should_receive(:present?).with("login", "pass").and_return(true)
-        post '/app1/sessions', @params
+        post '/sessions/app/app1', @params
         last_request.env["rack.session"]["current_user"].should == "login"
  
       end
@@ -758,7 +759,7 @@ describe 'Authenticatin Service' do
         it "Should redirect to the page if the log and pass is present" do
           Utilisation.should_receive(:present?).and_return(false)
           User.should_receive(:present?).with("login", "pass").and_return(true)
-          post '/app1/sessions', @params
+          post '/sessions/app/app1', @params
           last_response.should be_redirect
           follow_redirect!
           last_request.url.should == 'http://www.julienriby:6001/protected?login=login&secret=jesuisauth'
@@ -771,7 +772,7 @@ describe 'Authenticatin Service' do
 
         it "Should return the connexion form if present? return false" do    
           User.should_receive(:present?).with("login", "pass").and_return(false)
-          post '/app1/sessions', @params
+          post '/sessions/app/app1', @params
           last_response.body.should match %r{<h1>Portail de Connexion</h1>.*}
         end
       end

@@ -226,7 +226,7 @@ error 404 do
 end
 
 
-get '/:appli/sessions/new' do
+get '/sessions/new/app/:appli' do
 
   if Application.present?(params[:appli])
   
@@ -259,7 +259,7 @@ get '/:appli/sessions/new' do
   end
 end
 
-post '/:appli/sessions' do
+post '/sessions/app/:appli' do
 
   if User.present?(params['login'],params['passwd'])
 
