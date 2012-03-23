@@ -9,7 +9,7 @@ class Utilisation < ActiveRecord::Base
 
   validates :application_id, :presence => true
 
-  def self.utilisation_is_present(user, appli)
+  def self.present?(user, appli)
     
     if user.nil? || appli.nil?
       false

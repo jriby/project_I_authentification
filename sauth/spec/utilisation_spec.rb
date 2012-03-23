@@ -71,7 +71,7 @@ describe Utilisation do
         @params_util = { 'utilisation' => {"application" =>  @application, "user" => @user}}
         @utilisation = Utilisation.create(@params_util['utilisation'])
 
-        Utilisation.utilisation_is_present(@user, @application).should be_true
+        Utilisation.present?(@user, @application).should be_true
         @utilisation.destroy
         @application.destroy
         @user.destroy
@@ -92,19 +92,19 @@ describe Utilisation do
       @user.destroy
     end
       it "Should return false if the utilisation is not present" do
-        Utilisation.utilisation_is_present(@user, @application).should be_false
+        Utilisation.present?(@user, @application).should be_false
     end
  
       it "Should not be valid if the user is not given" do
-        Utilisation.utilisation_is_present(nil, @application).should be_false
+        Utilisation.present?(nil, @application).should be_false
       end
 
       it "Should not be valid if the application is not given" do
-        Utilisation.utilisation_is_present(@user, nil).should be_false
+        Utilisation.present?(@user, nil).should be_false
       end
 
       it "Should not be valid if the login and the application is not given" do
-        Utilisation.utilisation_is_present(nil, nil).should be_false 
+        Utilisation.present?(nil, nil).should be_false 
       end
 
 

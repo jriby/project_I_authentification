@@ -62,7 +62,7 @@ end
 
 post '/sessions' do
 
-  if User.user_is_present(params['login'],params['passwd'])
+  if User.present?(params['login'],params['passwd'])
     settings.logger.info("Connexion depuis le sauth de => "+params["login"])
     session["current_user"] = params['login']
     redirect "/"
@@ -156,7 +156,7 @@ get "/application/delete/:name" do
     
     app = Application.find_by_name(params["name"])
 
-    if !app.nil?
+    if app
       user = User.find_by_login(session["current_user"])
       if app.user_id != user.id
         403
@@ -186,7 +186,7 @@ get "/users/delete/:login" do
   usr = User.find_by_login(params["login"])
 
   if @user == "admin" 
-    if usr != nil
+    if usr
       User.delete(usr)
       redirect :"/sauth/admin"
     else      
@@ -206,7 +206,7 @@ end
 get "/sauth/admin" do
   @user = current_user
 
-  if @user.nil? || @user != "admin"    
+  if !@user || @user != "admin"    
     403
   else
     @users = User.all
@@ -228,13 +228,13 @@ end
 
 get '/:appli/sessions/new' do
 
-  if Application.application_is_present(params[:appli])
+  if Application.present?(params[:appli])
   
     if current_user
       user = User.find_by_login(session["current_user"])
       appl = Application.find_by_name(params[:appli])
     
-      if !Utilisation.utilisation_is_present(user, appl)
+      if !Utilisation.present?(user, appl)
         settings.logger.info("L'utilisateur "+user.login+" s'est inscrit a l'application "+appl.name)
         params_util = { 'utilisation' => {"application" => appl, "user" => user}}
         Utilisation.create(params_util['utilisation'])
@@ -245,7 +245,7 @@ get '/:appli/sessions/new' do
       settings.logger.info("L'utilisateur "+user.login+" utilise l'application "+appl.name)
       redirect "#{url}?login=#{log}&secret=jesuisauth"
   
-    elsif !params[:origin].nil?
+    elsif params[:origin]
       a = Application.find_by_name(params[:appli])
       @appli=params[:appli]
       @back_url=a.url+params[:origin]
@@ -261,7 +261,7 @@ end
 
 post '/:appli/sessions' do
 
-  if User.user_is_present(params['login'],params['passwd'])
+  if User.present?(params['login'],params['passwd'])
 
     user = User.find_by_login(params[:login])
     appl = Application.find_by_name(params[:appli])
@@ -269,7 +269,7 @@ post '/:appli/sessions' do
     login=params["login"]
     session["current_user"]=login    
 
-    if !Utilisation.utilisation_is_present(user, appl)
+    if !Utilisation.present?(user, appl)
       settings.logger.info("L'utilisateur "+login+" inscrit a l'application "+params[:appli])
       params_util = { 'utilisation' => {"application" => appl, "user" => user}}
       Utilisation.create(params_util['utilisation'])

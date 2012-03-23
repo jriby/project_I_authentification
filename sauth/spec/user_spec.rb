@@ -147,7 +147,7 @@ describe "Tests of methods" do
 
   end
 
-  describe "Test of method user_is_present" do
+  describe "Test of method present?" do
 before do
         @params = { 'user' => {"login" => "jgoin", "passwd" => "pass" }}
     end
@@ -155,31 +155,31 @@ before do
     it "Should use find_by_login" do
 
         User.should_receive(:find_by_login).with('jriby')
-        User.user_is_present('jriby', 'pass')
+        User.present?('jriby', 'pass')
     end
 
     it "Should return true if the user is present" do
         @user = User.create(@params['user'])
-        User.user_is_present('jgoin', 'pass').should be_true
+        User.present?('jgoin', 'pass').should be_true
         @user.destroy
     end
 
     context "will return false"
 
       it "Should not be valid if the user is not present" do
-        User.user_is_present('looool', 'pass').should be_false
+        User.present?('looool', 'pass').should be_false
       end
  
       it "Should not be valid if the user is not given" do
-        User.user_is_present(nil, 'pass').should be_false
+        User.present?(nil, 'pass').should be_false
       end
 
       it "Should not be valid if the pass is not given" do
-        User.user_is_present('looool', nil).should be_false
+        User.present?('looool', nil).should be_false
       end
 
       it "Should not be valid if the login and the pass is not given" do
-        User.user_is_present(nil, nil).should be_false
+        User.present?(nil, nil).should be_false
       end
 
 

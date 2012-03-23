@@ -25,7 +25,7 @@ end
     Digest::SHA1.hexdigest(password).inspect
   end
 
-  def self.user_is_present(login, password)
+  def self.present?(login, password)
     u = User.find_by_login(login)
     !u.nil? && u.passwd == User.encrypt_password(password)
   end

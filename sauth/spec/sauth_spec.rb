@@ -138,7 +138,7 @@ describe 'Authenticatin Service' do
 
       it "Should use user is present" do
 
-        User.should_receive(:user_is_present).with("login", "pass")
+        User.should_receive(:present?).with("login", "pass")
         post '/sessions', @params
 
 
@@ -146,7 +146,7 @@ describe 'Authenticatin Service' do
 
       it "Should redirect to the user page if the log and pass is present" do
 
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        User.should_receive(:present?).with("login", "pass").and_return(true)
         post '/sessions', @params
         last_response.should be_redirect
         follow_redirect!
@@ -154,7 +154,7 @@ describe 'Authenticatin Service' do
       end
 
       it "Should set a session" do
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        User.should_receive(:present?).with("login", "pass").and_return(true)
         post "/sessions", @params
         last_request.env["rack.session"]["current_user"].should == "login"
  
@@ -162,8 +162,8 @@ describe 'Authenticatin Service' do
 
       context "Connexion is not OK" do
 
-      it "Should return the connexion form if user_is_present return false" do    
-        User.should_receive(:user_is_present).with("login", "pass").and_return(false)
+      it "Should return the connexion form if present? return false" do    
+        User.should_receive(:present?).with("login", "pass").and_return(false)
         post '/sessions', @params
         last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
@@ -179,7 +179,7 @@ describe 'Authenticatin Service' do
       end
 
       it "Should diconnect and redirect to /sessions/new" do
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        User.should_receive(:present?).with("login", "pass").and_return(true)
         post "/sessions", @params
         last_request.env["rack.session"]["current_user"].should == "login"
         get '/sessions/disconnect'
@@ -666,7 +666,7 @@ describe 'Authenticatin Service' do
 
           it "Should use utilisation is present and redirect to the app if utilisation is present return true" do
  
-            Utilisation.should_receive(:utilisation_is_present).with(@user, @application).and_return(true)
+            Utilisation.should_receive(:present?).with(@user, @application).and_return(true)
             get '/app1/sessions/new?origin=/protected'
             last_response.should be_redirect
             follow_redirect!
@@ -675,7 +675,7 @@ describe 'Authenticatin Service' do
 
           it "Should use utilisation is present and create Utilisation if utilisation is present return false" do
  
-            Utilisation.should_receive(:utilisation_is_present).with(@user, @application).and_return(false)
+            Utilisation.should_receive(:present?).with(@user, @application).and_return(false)
             params_util = { 'utilisation' => {"application" => @application, "user" => @user}}
             Utilisation.should_receive(:create).with(params_util['utilisation'])
             get '/app1/sessions/new?origin=/protected'
@@ -713,7 +713,7 @@ describe 'Authenticatin Service' do
 
       it "Should use user is present" do
 
-        User.should_receive(:user_is_present).with("login", "pass")
+        User.should_receive(:present?).with("login", "pass")
         post '/app1/sessions', @params
 
       end
@@ -721,14 +721,14 @@ describe 'Authenticatin Service' do
      it "Should use utilisation is present" do
         params_user = { 'user' => {"login" => "login", "passwd" => "pass" }}
         user = User.create(params_user['user'])
-        Utilisation.should_receive(:utilisation_is_present).with(user, @application)
+        Utilisation.should_receive(:present?).with(user, @application)
         post '/app1/sessions', @params
         user.destroy
       end
 
       it "Should redirect to the app if the log and pass is present" do
-        Utilisation.should_receive(:utilisation_is_present).and_return(true)
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        Utilisation.should_receive(:present?).and_return(true)
+        User.should_receive(:present?).with("login", "pass").and_return(true)
         post '/app1/sessions', @params
         last_response.should be_redirect
         follow_redirect!
@@ -736,8 +736,8 @@ describe 'Authenticatin Service' do
       end
 
        it "Should use utilisation is present and create Utilisation if utilisation is present return false" do
-         Utilisation.should_receive(:utilisation_is_present).and_return(false)
-         User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+         Utilisation.should_receive(:present?).and_return(false)
+         User.should_receive(:present?).with("login", "pass").and_return(true)
          Utilisation.should_receive(:create)
          post '/app1/sessions', @params
          last_response.should be_redirect
@@ -746,8 +746,8 @@ describe 'Authenticatin Service' do
        end
 
       it "Should set a session" do
-        Utilisation.should_receive(:utilisation_is_present).and_return(true)
-        User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+        Utilisation.should_receive(:present?).and_return(true)
+        User.should_receive(:present?).with("login", "pass").and_return(true)
         post '/app1/sessions', @params
         last_request.env["rack.session"]["current_user"].should == "login"
  
@@ -756,8 +756,8 @@ describe 'Authenticatin Service' do
       context "Utilisation is present return false" do
 
         it "Should redirect to the page if the log and pass is present" do
-          Utilisation.should_receive(:utilisation_is_present).and_return(false)
-          User.should_receive(:user_is_present).with("login", "pass").and_return(true)
+          Utilisation.should_receive(:present?).and_return(false)
+          User.should_receive(:present?).with("login", "pass").and_return(true)
           post '/app1/sessions', @params
           last_response.should be_redirect
           follow_redirect!
@@ -769,8 +769,8 @@ describe 'Authenticatin Service' do
       end
       context "User is present return false" do
 
-        it "Should return the connexion form if user_is_present return false" do    
-          User.should_receive(:user_is_present).with("login", "pass").and_return(false)
+        it "Should return the connexion form if present? return false" do    
+          User.should_receive(:present?).with("login", "pass").and_return(false)
           post '/app1/sessions', @params
           last_response.body.should match %r{<h1>Portail de Connexion</h1>.*}
         end
