@@ -19,11 +19,26 @@ helpers do
   def current_user
     session["current_user"]
   end
-end
 
   def disconnect
     session["current_user"] = nil
   end
+end
+
+before '/' do
+  @user = current_user
+end
+
+before '/applications/new' do
+  redirect "/sessions/new" if !current_user
+end
+
+
+before '/sessions/new/app/:appli' do
+  redirect 404 if !Application.present?(params[:appli]) || !params[:origin]
+end
+
+
 
 #########################
 # Portail d'inscription
@@ -83,9 +98,10 @@ end
 # Index
 #########################
 get "/" do
-  @user = current_user
   erb :"/index"
 end
+
+
 
 #########################
 # Profile utilisateur
@@ -117,11 +133,8 @@ end
 #########################
 get '/applications/new' do
 
-  if current_user
     erb :"/applications/new"
-  else
-    403
-  end
+
 end
 
 post '/applications' do
@@ -152,15 +165,14 @@ end
 delete "/application/:name" do
 
   if session["current_user"]
-
     app = Application.find_by_name(params["name"])
 
     if app
-
       user = User.find_by_login(session["current_user"])
 
       if app.user_id != user.id
         403
+
       else
         Application.delete(app)
         @user = current_user
@@ -169,11 +181,10 @@ delete "/application/:name" do
 
     else
       404
-   end
+    end
 
   else
     403
-
   end
 end
 
@@ -213,8 +224,6 @@ end
 
 
 get '/sessions/new/app/:appli' do
-
-  if Application.present?(params[:appli])
   
     if current_user
       user = User.find_by_login(session["current_user"])
@@ -228,23 +237,19 @@ get '/sessions/new/app/:appli' do
 
       log = session["current_user"]
       url=appl.url+params[:origin]
+
       settings.logger.info("L'utilisateur "+user.login+" utilise l'application "+appl.name)
+
       redirect "#{url}?login=#{log}&secret=jesuisauth"
   
-    elsif params[:origin]
-      a = Application.find_by_name(params[:appli])
-      @appli=params[:appli]
-      @back_url=a.url+params[:origin]
-      erb :"sessions/appli"
     else
-      404
+      appl = Application.find_by_name(params[:appli])
+      @appli=params[:appli]
+      @back_url=appl.url+params[:origin]
+      erb :"sessions/appli"
     end
 
-  else
-    404
-  end
 end
-
 post '/sessions/app/:appli' do
 
   if User.present?(params['login'],params['passwd'])
@@ -260,6 +265,7 @@ post '/sessions/app/:appli' do
       params_util = { 'utilisation' => {"application" => appl, "user" => user}}
       Utilisation.create(params_util['utilisation'])
     end
+
     settings.logger.info("L'utilisateur "+login+" utilise l'application "+params[:appli])
     redirect "#{params[:back_url]}?login=#{params[:login]}&secret=jesuisauth"
   else
