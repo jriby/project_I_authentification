@@ -65,7 +65,7 @@ post '/sessions' do
   else
     @login = params['login']
     @error_con = "Les infos saisies sont incorrectes"
-    settings.logger.info("Tentative de connexion failed pour "+params['login'])   
+    settings.logger.info("Tentative de connexion failed pour "+params['login'])
     erb :"/sessions/new"
   end
 
@@ -93,10 +93,16 @@ end
 get "/users/:login" do
 
   if session["current_user"] == params[:login]
-    @u = User.find_by_login(params[:login])
-    uid = @u.id
+    user = User.find_by_login(params[:login])
+    uid = user.id
+    @user = current_user
+    
     @apps = Application.where(:user_id => uid)
     @utils = Utilisation.where(:user_id => uid)
+
+    if current_user == "admin"
+      @users = User.all
+    end
     erb :"users/profil"
   else
     403
@@ -127,7 +133,7 @@ post '/applications' do
 
 
   if @a.valid?
-    @params_util = { 'utilisation' => {"application" =>  @a, "user" => @u}}
+    @params_util = { 'utilisation' => {"application" => @a, "user" => @u}}
     @utilisation = Utilisation.create(@params_util['utilisation'])
     @user = @u.login
     redirect "/users/#@user"
@@ -180,32 +186,18 @@ delete "/users/:login" do
   @user = current_user
   usr = User.find_by_login(params["login"])
 
-  if @user == "admin" 
+  if @user == "admin"
     if usr
       User.delete(usr)
-      redirect :"/sauth/admin"
-    else      
+      redirect :"/users/admin"
+    else
        404
      end
 
-   else    
+   else
     403
   end
 
-
-end
-
-#########################
-# Portail d'admin users
-#########################
-get "/sauth/admin" do
-  @user = current_user
-  if !@user || @user != "admin"    
-    403
-  else
-    @users = User.all
-    erb :"/sauth/admin"
-  end
 
 end
 
@@ -261,7 +253,7 @@ post '/sessions/app/:appli' do
     appl = Application.find_by_name(params[:appli])
 
     login=params["login"]
-    session["current_user"]=login    
+    session["current_user"]=login
 
     if !Utilisation.present?(user, appl)
       settings.logger.info("L'utilisateur "+login+" inscrit a l'application "+params[:appli])
@@ -273,7 +265,7 @@ post '/sessions/app/:appli' do
   else
     @login = params['login']
     @back_url=params[:back_url]
-    @error_con = "Les infos saisies sont incorrectes" 
+    @error_con = "Les infos saisies sont incorrectes"
     @appli=params[:appli]
     settings.logger.info("Tentative de connexion failed pour "+params['login'])
     erb :"sessions/appli"
