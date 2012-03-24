@@ -35,7 +35,7 @@ describe 'Authenticatin Service' do
 #########################
     describe "post /users" do
       before do
-        @params = { 'login' => "login", "passwd" => "pass" }
+        @params = { 'user' => {'login' => "login", "passwd" => "pass"}}
         @u = double("user", "login" => "login", "passwd" => "pass" )
         User.stub(:create){@u}
         @u.stub(:valid?){true}
@@ -182,7 +182,7 @@ describe 'Authenticatin Service' do
     
       context "with current_user" do
         before do
-          User.should_receive(:present?).with("lolo", "pass").and_return(true)
+          User.stub(:present?).and_return(true)
           @params = { 'login' => "lolo", 'passwd' => "pass" }
           post "/sessions", @params
 
@@ -267,10 +267,11 @@ describe 'Authenticatin Service' do
 #########################
     describe "post /applications" do
       before do
-        @params = { 'name' => "appli", "url" => "http://www.julienriby.fr" }
+        @params = { 'application' => {'name' => "appli", "url" => "http://www.julienriby.fr" }}
        
         @a = double("application", :name => "appli", :url => "http://www.julienriby.fr", :user_id => "01")
         Application.stub(:create){@a}
+
         Utilisation.stub(:create)
 
         u = double("user", :id => 01, :login => "log", :passwd => "pass")       
@@ -491,6 +492,7 @@ describe 'Authenticatin Service' do
     describe "get /sessions/new/app/app1" do
       context "With good app" do
       before do
+        Utilisation.stub(:create)
 	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
         @application = Application.create(params['application'])
       end
@@ -566,6 +568,7 @@ describe 'Authenticatin Service' do
 
     describe "post /sessions/app/:appli" do
       before do
+        Utilisation.stub(:create)
         @params = { 'login' => "login", "passwd" => "pass", 'back_url' => "http://www.julienriby:6001/protected" }
 	params = { 'application' => {"name" => "app1", "url" => "http://www.julienriby:6001", "user_id" => 01}}
         @application = Application.create(params['application'])

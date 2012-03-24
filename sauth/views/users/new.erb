@@ -26,11 +26,11 @@
   <div class="field">
     <label for="login">Login</label><br />
 
-    <input id="login" name="login" size="30" type="text" value="<%= if @u; @u.login end %>" />
+    <input id="login" name="user[login]" size="30" type="text" value="<%= if @u; @u.login end %>" />
   </div>
   <div class="field">
     <label for="passwd">Mot de passe</label><br />
-    <input id="passwd" name="passwd" size="30" type="password" />
+    <input id="passwd" name="user[passwd]" size="30" type="password" />
   </div>
   <div class="actions">
     <input name="commit" type="submit" value="Inscription" />

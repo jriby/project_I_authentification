@@ -35,10 +35,6 @@ get '/users/new' do
 end
 
 post'/users' do
-  login = params['login']
-  passwd = params['passwd']
-
-  params = { 'user' => {"login" => login, "passwd" => passwd }}
   
   @u = User.create(params['user'])
   
@@ -124,14 +120,9 @@ end
 
 post '/applications' do
 
-  name = params['name']
-  url = params['url']
   @u = User.find_by_login(current_user)
-  uid = @u.id
-   
-   
-  params = { 'application' => {"name" => name, "url" => url, "user_id" => uid}}
-
+  params['application']['user_id'] = @u.id
+  
   @a = Application.create(params['application'])
 
 
