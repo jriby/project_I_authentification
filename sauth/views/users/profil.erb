@@ -10,12 +10,31 @@
         
 <div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
 	  <p>Bonjour <%= @user %> </p>
-            <p><%= @error %></p>
-            <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
+            <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p>
+
+         <% @users = User.all%>
+
+           <div class="listappown">
+             <p>Liste des utilisateurs</p>
+             
+            <ul>
+              <% @users.each do |u| %> 
+                <%if u.login != "admin"%>
+                   
+                  <li><%=u.login%> - <form action="/users/<%= u.login%>" method="post">
+                                     <input name="commit" type="submit" value="supprimer" />
+                                     <input name="_method" type="hidden" value="delete" />
+                                     </form 
+                  </li>
+                <% end %>              
+              <% end %>
+            </ul>
+            </div>
+
+          <% end %>
           <p></p>
           <a href="/applications/new"> Inscrire une application </a>
           <p></p>
-          <a href="/sessions/disconnect"> Deco </a>
 
           <% if !@apps.empty?%>
  
@@ -51,6 +70,9 @@
            <%else%>
              <p>Vous n'utilisez aucune application</p>
            <%end%>
+          <a href="/"> Retourner à l'acceuil </a>
+          <p></p>
+          <a href="/sessions/disconnect"> Deco </a>
 </div>
 </center>
 </body>
