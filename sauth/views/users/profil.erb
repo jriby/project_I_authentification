@@ -24,7 +24,11 @@
              
             <ul>
               <% @apps.each do |a| %>
-                <li><%=a.name%>  : <%=a.url%> - <a href="/application/delete/<%=a.name%>" method="delete">effacer</a> </li>
+                <li><%=a.name%>  : <%=a.url%> - <form action="/application/<%= a.name%>" method="post">
+                                     <input name="commit" type="submit" value="effacer" />
+                                     <input name="_method" type="hidden" value="delete" />
+                                     </form 
+                  </li> </li>
               <% end %>
             </ul>
             </div>

@@ -128,19 +128,21 @@ post '/applications' do
   url = params['url']
   @u = User.find_by_login(current_user)
   uid = @u.id
-
+   
+   
   params = { 'application' => {"name" => name, "url" => url, "user_id" => uid}}
 
   @a = Application.create(params['application'])
 
+
   if @a.valid?
     @params_util = { 'utilisation' => {"application" =>  @a, "user" => @u}}
     @utilisation = Utilisation.create(@params_util['utilisation'])
-    @user = current_user
+    @user = @u.login
     redirect "/users/#@user"
   else
     @error = @a.errors.messages
-    erb :"/applications/new", :locals => {:user => current_user}
+    erb :"/applications/new"
   end
 
 end
@@ -150,14 +152,16 @@ end
 # Destruction d'appli
 #########################
 
-get "/application/delete/:name" do
+delete "/application/:name" do
 
   if session["current_user"]
-    
+
     app = Application.find_by_name(params["name"])
 
     if app
+
       user = User.find_by_login(session["current_user"])
+
       if app.user_id != user.id
         403
       else
@@ -180,7 +184,7 @@ end
 #########################
 # Destruction de user
 #########################
-get "/users/delete/:login" do
+delete "/users/:login" do
 
   @user = current_user
   usr = User.find_by_login(params["login"])
@@ -205,7 +209,6 @@ end
 #########################
 get "/sauth/admin" do
   @user = current_user
-
   if !@user || @user != "admin"    
     403
   else

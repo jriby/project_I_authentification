@@ -12,7 +12,7 @@
 
 		<p >Saisir un nom et une url (http(s)://...) pour iscrire l'app</p>
 <div style="width: 600px; padding: 20px; text-align: left; background: rgb(255,255,255); box-shadow: 0 0 3px rgba(0,0,0,0.3);">
-<% if !@a.nil? %>
+<% if @error  %>
 
 	<p >Les informations saisies sont incorrects</p>
 

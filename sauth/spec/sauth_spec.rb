@@ -22,7 +22,7 @@ describe 'Authenticatin Service' do
       it "should get /users/new" do
         get '/users/new'
         last_response.should be_ok
-        #last_request.path.should == '/users/new'
+        last_request.path.should == '/users/new'
          end
 
       it "should return a form to post registration info to /users" do
@@ -35,24 +35,20 @@ describe 'Authenticatin Service' do
 #########################
     describe "post /users" do
       before do
-        @params_create = { 'user' => {"login" => "login", "passwd" => "pass" }}
         @params = { 'login' => "login", "passwd" => "pass" }
-      
-        @u = User.new
-        @u.login = "login"
-        @u.passwd = "pass"
-        User.should_receive(:create).with(@params_create['user']).and_return(@u)
+        @u = double("user", "login" => "login", "passwd" => "pass" )
+        User.stub(:create){@u}
+        @u.stub(:valid?){true}
       end
 
       it "should use create" do
-       
+        User.should_receive(:create).with("login" => "login", "passwd" => "pass").and_return(@u)
         post '/users', @params
 
       end
 
       it "should redirect to /sessions/new" do
 
-   
         post '/users', @params
         last_response.should be_redirect
         follow_redirect!
@@ -61,47 +57,14 @@ describe 'Authenticatin Service' do
 
       context "Registration is not OK" do
 
-        it "should render the registration form if the login is not set" do
-           
-           @u.login = ""
-
+        it "should render the registration form if the user is not valid" do
+           User.stub(:create){@u}
+           @u.stub(:valid?){false}
+           err = double()
+           @u.stub(:errors){err}
+           err.stub(:messages) 
            post '/users', @params
            last_response.body.should match %r{<form action="/users" method="post".*}
-         end
-
-         it "should render the registration form if the pass is not set" do
-           
-           @u.passwd = ""
-
-           post '/users', @params
-           last_response.body.should match %r{<form action="/users" method="post".*}
-         end
-
-
-        it "should render the registration form if the login and the pass are not set" do
-           
-           @u.login = ""
-           @u.passwd = ""
-
-           post '/users', @params
-           last_response.body.should match %r{<form action="/users" method="post".*}
-         end
-
-        it "should render the registration form if the login is already taken" do
-           
-           ut = User.new
-           ut.login = "taken"
-           ut.passwd = "pass"
-           ut.save
-
-           @u.login = "taken"
-           @u.passwd = "taken"
-
-
-           post '/users', @params
-           last_response.body.should match %r{<form action="/users" method="post".*}
-
-           ut.destroy
          end
 
       end
@@ -167,8 +130,6 @@ describe 'Authenticatin Service' do
         post '/sessions', @params
         last_response.body.should match %r{<form action="/sessions" method="post".*}
       end
-
-
       end
     end
 
@@ -181,7 +142,7 @@ describe 'Authenticatin Service' do
       it "Should diconnect and redirect to /sessions/new" do
         User.should_receive(:present?).with("login", "pass").and_return(true)
         post "/sessions", @params
-        last_request.env["rack.session"]["current_user"].should == "login"
+
         get '/sessions/disconnect'
         last_response.should be_redirect
         follow_redirect!
@@ -215,17 +176,13 @@ describe 'Authenticatin Service' do
     describe "get /users/:login" do
 
     before do 
-       @u = User.new
-       @u.login = "lolo"
-       @u.passwd = "pass"    
-       @u.save
+      @u = double("user", "id" => 01, "login" => "lolo", "passwd" => "pass" )
+      User.stub(:find_by_login){@u}
     end    
     
-    after do 
-       @u.destroy
-    end
       context "with current_user" do
         before do
+          User.should_receive(:present?).with("lolo", "pass").and_return(true)
           @params = { 'login' => "lolo", 'passwd' => "pass" }
           post "/sessions", @params
 
@@ -241,16 +198,17 @@ describe 'Authenticatin Service' do
           get '/users/lolo'
           last_response.body.should match %r{<h1>Profil User</h1>.*}
         end
-      end
-
-      context "without good current_user" do
-        it "should have error 403" do
-          get '/users/momo'
-          last_response.status.should == 403       
-          last_response.body.should match %r{<h1>Forbiden</h1>.*}
-
+        
+        context "with bad current_user" do
+          it "should have error 403" do
+            get '/users/momo'
+            last_response.status.should == 403       
+            last_response.body.should match %r{<h1>Forbiden</h1>.*}
+          end
         end
       end
+
+
       context "without current_user" do
         it "should have error 403" do
           get '/users/momo'
@@ -273,15 +231,9 @@ describe 'Authenticatin Service' do
     describe "get /applications/new" do
       context "with current user" do
       before do
-        @u = User.new
-        @u.login = "log"
-        @u.passwd = "pass"    
-        @u.save
+        User.stub(:present?){true}
         @params = { 'login' => "log", 'passwd' => "pass" }
         post "/sessions", @params
-      end
-      after do
-        @u.destroy
       end
 
        it "should get /applications/new" do
@@ -315,40 +267,27 @@ describe 'Authenticatin Service' do
 #########################
     describe "post /applications" do
       before do
- 	@params_create = { 'application' => {"name" => "appli", "url" => "http://www.julienriby.fr", "user_id" => 01}}
         @params = { 'name' => "appli", "url" => "http://www.julienriby.fr" }
-        
-        @a = Application.new
-        @a.name = "appli"
-        @a.url = "http://www.julienriby.fr"
-        @a.user_id = "01"
+       
+        @a = double("application", :name => "appli", :url => "http://www.julienriby.fr", :user_id => "01")
+        Application.stub(:create){@a}
+        Utilisation.stub(:create)
 
-        @u = User.new
-        @u.id = "01"
-        @u.login = "log"
-        @u.passwd = "pass"
+        u = double("user", :id => 01, :login => "log", :passwd => "pass")       
+        User.stub(:find_by_login){u}
 
-
-        User.stub(:find_by_login).and_return(@u)
-        User.stub(:id).and_return("01")
       end
 
       context "Inscription app is OK" do
-      
-        before do
-          Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        end
-
+      before do
+        @a.stub(:valid?){true}
+      end
         it "should use create" do
-           
-          post '/applications', @params
-
+          Application.should_receive(:create).with({"name"=>"appli", "url"=>"http://www.julienriby.fr", "user_id"=>1})
+          post '/applications', @params	  
         end
 
         it "should redirect to /users/:login" do
-          @params_con = { 'login' => "log", 'passwd' => "pass" }
-          post "/sessions", @params_con
- 
           post '/applications', @params
           last_response.should be_redirect
           follow_redirect!
@@ -358,60 +297,15 @@ describe 'Authenticatin Service' do
       end
 
       context "Inscription app is not OK" do
-        before do
-          Application.should_receive(:create).with(@params_create['application']).and_return(@a)
-        end
-        it "should give /applications/new form if the name is not set" do
-           
-           @a.name = ""          
+  
+        it "should give /applications/new" do
+           err = double()
+           @a.stub(:errors){err}
+           err.stub(:messages)           
+           @a.stub(:valid?){false}
            post '/applications', @params
            last_response.body.should match %r{<form action="/applications" method="post".*}
          end
-
-        it "should give /applications/new form if the url is not set" do
-           
-           @a.url = ""
-           post '/applications', @params
-           last_response.body.should match %r{<form action="/applications" method="post".*}
-         end
-
-
-
-         it "should give /applications/new form if the name and the url are not set" do
-           @a.name = ""
-           @a.url = ""
-           post '/applications', @params
-           last_response.body.should match %r{<form action="/applications" method="post".*}
-         end
-
-        it "should give /applications/new form if the url is invalid" do
-           @a.url = "badurl"
-           post '/applications', @params
-           last_response.body.should match %r{<form action="/applications" method="post".*}
-         end
-
-        it "should give /applications/new form if the name is invalid" do
-           @a.name = "bad*name"
-           post '/applications', @params
-           last_response.body.should match %r{<form action="/applications" method="post".*}
-         end
-
-        it "should give /applications/new form if the name is already taken" do
-           
-           at = Application.new
-           at.name = "taken"
-           at.url = "http://www.julienriby.fr"
-           at.user_id = "01"
-           at.save
-
-           @a.name = "taken"
-           @a.url = "http://www.julien.fr"
-           post '/applications', @params
-           last_response.body.should match %r{<form action="/applications" method="post".*}
-
-           at.destroy
-         end
-
       end
     end
   end
@@ -423,67 +317,53 @@ describe 'Authenticatin Service' do
 #########################
 # Destruction d'appli
 #########################
-    describe "get /application/delete/:name" do
+    describe "delete /application/:name" do
     
     before do
-      @u = User.new
-      @u.login = "log"
-      @u.passwd = "pass"    
-      @u.save
-      @a = Application.new
-      @a.id = 1
-      @a.name = "atodel"
-      @a.url = "http://atodel.fr"
-      @a.user_id = @u.id    
-      @a.save
+      @u = double("user", "id" => 1, "login" => "log", "passwd" => "pass" )
+      User.stub(:find_by_login){@u}
+
+      @a = double("application", :id => 1, :name => "atodel", :url => "http://atodel.fr", :user_id => 1)
     end
-    after do
-      @u.destroy
-      @a.destroy
-    end
+
       context "with current user" do
       before do
+          User.stub(:present?){true}
           @params = { 'login' => "log", 'passwd' => "pass" }
           post "/sessions", @params
 
       end
         
-       it "should use delete in @a and redirect to /users/log" do
-          get '/application/delete/atodel'
-          #Application.should_receive(:delete)
-          adel = Application.find_by_name("utodel")
-          adel.should == nil
+       it "should use delete and redirect to /users/log" do
+          Application.stub(:find_by_name){@a}
+          Application.should_receive(:delete).with(@a)
+          delete '/application/atodel'
           last_response.should be_redirect
           follow_redirect!
           last_request.path.should == '/users/log'
         end     
 
       it "should have error 404 if the app doesn't exist" do
-          get '/application/delete/apasexister'
+        Application.stub(:find_by_name){nil}
+        delete '/application/apasexister'
         last_response.status.should == 404
         last_response.body.should match %r{<h1>Not Found</h1>.*} 
         end     
       end
       context "without current user" do
         it "should have error 403" do
-          get '/application/delete/atodel'
+        delete '/application/atodel'
         last_response.status.should == 403       
         last_response.body.should match %r{<h1>Forbiden</h1>.*}
         end
       end
       context "without user admin of the app" do
         it "should have error 403" do
-          @u2 = User.new
-          @u2.login = "toto"
-          @u2.passwd = "pass"    
-          @u2.save
-          @params = { 'login' => "toto", 'passwd' => "pass" }
+          @a = double("application", :id => 1, :name => "atodel", :url => "http://atodel.fr", :user_id => 2)
           post "/sessions", @params
-          get '/application/delete/atodel'
+          delete '/application/atodel'
           last_response.status.should == 403       
           last_response.body.should match %r{<h1>Forbiden</h1>.*}
-  
-          @u2.destroy
         end
       end
     end
@@ -499,29 +379,30 @@ describe 'Authenticatin Service' do
 
     context "Without current user" do
       it "should have error 403" do
-        get '/users/delete/lol'
+        delete '/users/lol'
         last_response.status.should == 403       
         last_response.body.should match %r{<h1>Forbiden</h1>.*}
       end
     end
 
     context "With current user" do
-      it "should delete the user if the curent user is admin" do
-        u = User.new
-        u.login = "admin"
-        u.passwd = "pass"    
-        u.save
-        ud = User.new
-        ud.login = "utodel"
-        ud.passwd = "pass"    
-        ud.save
+    before do
+      @u = double("user","login" => "admin", "passwd" => "pass" )
 
-        @params = { 'login' => "admin", 'passwd' => "pass" }
-        post "/sessions", @params
-         
-        get '/users/delete/utodel'
-        udel = User.find_by_login("utodel")
-        udel.should == nil
+      @ud = double("user","login" => "utodel", "passwd" => "pass" )
+      User.stub(:find_by_login){@ud}
+
+      User.stub(:present?){true}
+      @params = { 'login' => "admin", 'passwd' => "pass" }
+      post "/sessions", @params
+
+    end
+
+      it "should delete the user and redirect to admin page if the curent user is admin" do
+
+        User.should_receive(:delete).with(@ud)        
+        delete '/users/utodel'
+
         last_response.should be_redirect
         follow_redirect!
         last_response.body.should match %r{<h1>Admin Page</h1>.*}
@@ -529,33 +410,23 @@ describe 'Authenticatin Service' do
       end
 
       it "should have error 404 if the user to del doesn't exist" do
-        u = User.new
-        u.login = "admin"
-        u.passwd = "pass"    
-        u.save
 
-        @params = { 'login' => "admin", 'passwd' => "pass" }
-        post "/sessions", @params
-         
-        get '/users/delete/utodel'
+        User.stub(:find_by_login){nil}
+
+        delete '/users/utodel'
         last_response.status.should == 404
         last_response.body.should match %r{<h1>Not Found</h1>.*}  
 
       end
       it "should have error 403 if the curent user is not admin" do
-        u = User.new
-        u.login = "lol"
-        u.passwd = "pass"    
-        u.save
-        @params = { 'login' => "lol", 'passwd' => "pass" }
+        User.stub(:present?){true}
+        @params = { 'login' => "noadmin", 'passwd' => "pass" }
         post "/sessions", @params
-        
-        
-        get '/users/delete/utodel'
+            
+        delete '/users/utodel'
         last_response.status.should == 403
         last_response.body.should match %r{<h1>Forbiden</h1>.*}      
 
-        u.destroy
       end
     end
   end
@@ -570,16 +441,12 @@ describe 'Authenticatin Service' do
   describe "get /sauth/admin" do
     context "With current user admin"
     before do
-      @u = User.new
-      @u.login = "admin"
-      @u.passwd = "pass"    
-      @u.save
+      User.stub(:present?){true}
       @params = { 'login' => "admin", 'passwd' => "pass" }
       post "/sessions", @params
     end
     after do
       get '/sessions/disconnect'
-      @u.destroy
     end
       it "should get /sauth/admin" do
         get '/sauth/admin'
@@ -595,11 +462,8 @@ describe 'Authenticatin Service' do
     context "Without current user admin"
 
       it "should have error 403 if the current user is not the admin" do
-        u = User.new
-        u.login = "pasadmin"
-        u.passwd = "pass"    
-        u.save
-        @params = { 'login' => "pasadmin", 'passwd' => "pass" }
+        User.stub(:present?){true}
+        @params = { 'login' => "noadmin", 'passwd' => "pass" }
         post "/sessions", @params
 
         get '/sauth/admin'
@@ -607,11 +471,9 @@ describe 'Authenticatin Service' do
         last_response.body.should match %r{<h1>Forbiden</h1>.*}
 
         get '/sessions/disconnect'
-        u.destroy
       end
 
       it "should have error 403 if there is no user" do
-        get '/sessions/disconnect'
         get '/sauth/admin'
         last_response.status.should == 403       
         last_response.body.should match %r{<h1>Forbiden</h1>.*}

@@ -22,7 +22,11 @@
               <% @users.each do |u| %> 
                 <%if u.login != "admin"%>
                    
-                  <li><%=u.login%> - <a href="/users/delete/<%= u.login%>"" >Supprimer</a> </li>
+                  <li><%=u.login%> - <form action="/users/<%= u.login%>" method="post">
+                                     <input name="commit" type="submit" value="effacer" />
+                                     <input name="_method" type="hidden" value="delete" />
+                                     </form 
+                  </li>
                 <% end %>              
               <% end %>
             </ul>
