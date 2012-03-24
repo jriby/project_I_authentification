@@ -47,20 +47,15 @@ describe 'app' do
     end
 
     context "With session" do
-    before do
-      @params = { 'secret' => "jesuisauth", "login" => "log"}
-      get '/protected', @params
-      last_request.env["rack.session"]["current_user_app1"].should == "log"
-    end
 
       it "should get /protected" do
-        get '/protected'
+        get '/protected',"","rack.session" => { "current_user_app1" => "lolo" }
         last_response.should be_ok
         last_request.path.should == '/protected'
       end
 
       it "should return the private page" do
-        get '/protected'
+        get '/protected',"","rack.session" => { "current_user_app1" => "lolo" }
         last_response.body.should match %r{<h1>Page privee appli cli 1</h1>.*}
       end
     end

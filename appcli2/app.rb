@@ -14,6 +14,9 @@ helpers do
   end
 end
 
+before '/protected' do
+      redirect 'http://sauth:6666/sessions/new/app/app2?origin=/protected' if !current_user && !params['secret']
+end
 
 #########################
 # Index
@@ -29,20 +32,13 @@ end
 get '/protected' do
 
   if current_user
-    #j'ai un cookie dans app
     erb :protected
 
-  #j'ai pas de cookie ds app
-  elsif params['secret'].nil?
-    #Pas de secret donc ce n'est pas une rep de sauth
-    redirect 'http://sauth:6666/sessions/new/app/app2?origin=/protected'
-    elsif params['secret']=="jesuisauth" && !params['login'].nil?
-      #L'auth est OK
+  elsif params['secret']=="jesuisauth" && !params['login'].nil?
       session["current_user_app2"] = params['login']
       erb :protected
       
       else
-        #Pas de secret ou de param login -> je ne parle pas ac le bon sauth
         'Probleme avec le sauth !'
    end
 end
