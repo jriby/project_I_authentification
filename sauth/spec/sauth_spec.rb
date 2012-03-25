@@ -325,6 +325,7 @@ describe 'Authenticatin Service' do
       @u = double("user", "login" => "login", "passwd" => "pass" )
       @a = double("application", :name => "app", :url => "http://app:6011", :user_id => 1)
       User.stub(:find_by_login){@u}
+      Application.stub(:create)
       Application.stub(:find_by_name){@a}
       Utilisation.stub(:create)
       Utilisation.stub(:present?){true}

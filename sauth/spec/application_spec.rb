@@ -131,6 +131,9 @@ describe "Test of method delete" do
     Utilisation.where(:application_id => @application.id).should == []
     Application.find_by_name(@application.name).should == nil
 
+   @user1.destroy
+   @user2.destroy
+
   end
 end
 
