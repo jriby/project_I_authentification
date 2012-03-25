@@ -5,12 +5,9 @@ require 'utilisation'
 
 describe Application do
 
-#Une personne doit être valide si elle dispose d'un nom et d'un prénom. Le login d'une personne doit être unique sur toute la base.
-
 describe "init" do
 
   describe "With good infos" do
-
     it "should be valid with a name, an url (http) and a user" do
 	  @params = { 'application' => {"name" => "appli", "url" => "http://www.julienriby", "user_id" => 01}}
           @application = Application.create(@params['application'])
@@ -30,13 +27,6 @@ describe "init" do
       @application = Application.create(@params['application'])
       @application.should be_valid
       @application.destroy
-    end
-
-    it "should be valid with a name, an url (https) and a user" do
-        @params = { 'application' => {"name" => "appli", "url" => "https://www.julienriby", "user_id" => 01}}
-        @application = Application.create(@params['application'])
-        @application.should be_valid
-        @application.destroy
     end
 
   end
@@ -84,7 +74,8 @@ describe "init" do
   end
 
   describe "With bad info" do
-    it "should not be valid with a bad url (http://.. ou https:// " do
+
+    it "should not be valid with a bad url" do
       @params = { 'application' => {"name" => "appli", "url" => "bad", "user_id" => 01}}
       @application = Application.create(@params['application'])
       @application.errors.messages[:url].include?("is invalid").should be_true
@@ -159,9 +150,9 @@ end
     @application.destroy
   end
 
-  context "will return false"
+  context "will return false or unvalid"
 
-    it "Should not be valid if the application is not present" do
+    it "Should return false if the application is not present" do
       Application.present?('appli').should be_false
     end
  

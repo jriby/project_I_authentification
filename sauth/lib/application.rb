@@ -12,7 +12,7 @@ class Application < ActiveRecord::Base
   validates :name, :format => { :with => /^[a-z0-9_-]{2,}$/i, :on => :create }
 
   validates :url, :presence => true
-  validates :url, :format => { :with => /^https?:\/\/[a-z0-9._\/-:]/i, :on => :create }
+  validates :url, :format => { :with => /^http:\/\/[a-z0-9._\/-:]/i, :on => :create }
 
   validates :user_id, :presence => true
 

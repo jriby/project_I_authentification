@@ -59,14 +59,13 @@ Julien RIBY
         ├── forbidden.erb
         ├── index.erb
         ├── notfound.erb
-        ├── sauth
-        │   └── admin.erb
         ├── sessions
         │   ├── appli.erb
         │   └── new.erb
         └── users
             ├── new.erb
             └── profil.erb
+
 
 ------------------------------------------------------------------------------------
 Lancer les rspec du sauth et ses lib
@@ -77,14 +76,12 @@ Lancer les rspec du sauth et ses lib
 
 Vous devez avoir :
 
-
 Application
   init
     With good infos
       should be valid with a name, an url (http) and a user
       should be valid with a name, an url, a port, and a user
       should be valid with a name, an url with .fr, and a user
-      should be valid with a name, an url (https) and a user
     With info missing
       should not be valid without a name
       should not be valid without an url
@@ -93,16 +90,16 @@ Application
       should not be valid if the url is empty
       should not be valid if the user_id is empty
     With bad info
-      should not be valid with a bad url (http://.. ou https:// 
+      should not be valid with a bad url
       should not be valid with a bad name (other char than a-z0-9_-) 
   Unicity
     should have a name unique
   Test of method delete
     Should delete appli and utilisations of appli
-  Test of method application_is_present
+  Test of method present?
     Should use find_by_name
     Should return true if the application is present
-    Should not be valid if the application is not present
+    Should return false if the application is not present
     Should not be valid if the application is not given
 
 Authenticatin Service
@@ -114,10 +111,7 @@ Authenticatin Service
       should use create
       should redirect to /sessions/new
       Registration is not OK
-        should render the registration form if the login is not set
-        should render the registration form if the pass is not set
-        should render the registration form if the login and the pass are not set
-        should render the registration form if the login is already taken
+        should render the registration form if the user is not valid
   Connexion Service
     get /sessions/new
       should get /sessions/new
@@ -127,7 +121,7 @@ Authenticatin Service
       Should redirect to the user page if the log and pass is present
       Should set a session
       Connexion is not OK
-        Should return the connexion form if user_is_present return false
+        Should return the connexion form if present? return false
     get /sessions/disconnect
       Should diconnect and redirect to /sessions/new
   Index and user pages
@@ -138,8 +132,8 @@ Authenticatin Service
       with current_user
         should get /users
         should return the user page
-      without good current_user
-        should have error 403
+        with bad current_user
+          should have error 403
       without current_user
         should have error 403
   App registration
@@ -148,44 +142,34 @@ Authenticatin Service
         should get /applications/new
         should return a form to post registration info to /applications
       without current user
-        should have error 403
+        should redirect to /sessions/new
     post /applications
       Inscription app is OK
         should use create
         should redirect to /users/:login
       Inscription app is not OK
-        should give /applications/new form if the name is not set
-        should give /applications/new form if the url is not set
-        should give /applications/new form if the name and the url are not set
-        should give /applications/new form if the url is invalid
-        should give /applications/new form if the name is invalid
-        should give /applications/new form if the name is already taken
-  Destroy app or user
-    get /application/delete/:name
+        should give /applications/new
+  Delete app or user
+    delete /application/:name
       with current user
-        should use delete in @a and redirect to /users/log
-        should have error 404 if the app doesn't exist
+        should use delete and redirect to /users/log
+        Bad delete
+          should have error 404 if the app doesn't exist
+          should have error 403 if it's not the user of the app
       without current user
         should have error 403
-      without user admin of the app
-        should have error 403
     delete /users/:login
+      With current user
+        should delete the user and redirect to admin profil if the curent user is admin
+        bad del
+          should have error 404 if the user to del doesn't exist
+          should have error 403 if the curent user is not admin
       Without current user
         should have error 403
-      With current user
-        should delete the user if the curent user is admin
-        should have error 404 if the user to del doesn't exist
-        should have error 403 if the curent user is not admin
-    Admin of the sauth
-      should have error 403 if the current user is not the admin
-      should have error 403 if there is no user
-      get /sauth/admin
-        should get /sauth/admin
-        should return the admin page
   Connexion Service with app
-    get /app1/sessions/new
+    get /sessions/new/app/app1
       With good app
-        should get /app1/sessions/new
+        should get /sessions/new/app/app1
         should return a form to post registration info to /app1/sessions
         With current user
           Should redirect to the app
@@ -194,16 +178,14 @@ Authenticatin Service
         With bad info
           should return 404 if app1 doesn't exist
           should return 404 if origin is not set
-    post /:appli/sessions
+    post /sessions/app/:appli
       Should use user is present
       Should use utilisation is present
       Should redirect to the app if the log and pass is present
-      Should use utilisation is present and create Utilisation if utilisation is present return false
+      Should use create Utilisation if utilisation is present return false
       Should set a session
-      Utilisation is present return false
-        Should redirect to the page if the log and pass is present
       User is present return false
-        Should return the connexion form if user_is_present return false
+        Should return the connexion form if present? return false
 
 User
   init
@@ -228,7 +210,7 @@ User
         Should not be valid if the pass is empty
         Should not be valid if the pass is nil
         Should not be valid if the login is nil
-    Test of method user_is_present
+    Test of method present?
       Should use find_by_login
       Should return true if the user is present
       Should not be valid if the user is not present
@@ -252,8 +234,9 @@ Utilisation
       Should not be valid if the application is not given
       Should not be valid if the login and the application is not given
 
-Finished in 9.98 seconds
-104 examples, 0 failures
+Finished in 5.53 seconds
+90 examples, 0 failures
+
 
 ------------------------------------------------------------------------------------
 Lancer les rspec de app1
@@ -279,6 +262,10 @@ app
     Bad secret
       should have the message Probleme avec le sauth !
 
+Finished in 0.04617 seconds
+8 examples, 0 failures
+
+
 ------------------------------------------------------------------------------------
 Lancer les rspec de app2
 ------------------------------------------------------------------------------------
@@ -302,6 +289,10 @@ app
       should return the private page
     Bad secret
       should have the message Probleme avec le sauth !
+
+Finished in 0.04303 seconds
+8 examples, 0 failures
+
 
 ------------------------------------------------------------------------------------
 Lancer le sauth et les applis
@@ -443,8 +434,8 @@ Admin du sauth - Suppr de user
         1. Se connecter avec les log : login : admin, pass : admin
         ---> Vous êtes sur la page du grand maître du sauth
         1.1 Tel un user normal vous pouver créer, modifier et vour la liste des appli de admin via Allez a votre profil 
-        2. Cliquer sur Go to admin user
-        ---> Vous êtes sur la page admin- Vous avez la liste des user du sauth
+        2. Cliquer sur Allez a votre profil 
+        ---> Vous êtes sur le profil de l'admin- Vous avez la liste des user du sauth
         3. Cliquer sur Supprimer en face de test
         ---> Le user ainsi que toutes ces applis sont supprimer - Dans la table utilisation les utilisation ac le user st suppr
         ---> Vous restez sur la page admin
@@ -466,7 +457,7 @@ Redirection
         3. Se logger
         -----> Vous êtes redirigé vers l'appli
 
-        Vous pouvez allez de la page privé à la page public sans être redirigé car il y a un cookie pour l'app 1
+        Vous pouvez allez de la page privé à la page public sans être redirigé car maintenant il y a un cookie pour l'app 1 (1 day)
 
 ////////////////
 Redirection transparente
@@ -475,7 +466,7 @@ Redirection transparente
         0. être logguer sur sauth
 	1. Se connecter à l'appli cliente 2 : http://app:6002
         2. Allez à la page privée
-        -----> Pas de cookie dans app2 donc vous êtes redirigé vers le sauth mais étant déja connecté vous êtes redirigé sur l'app
+        -----> Pas de cookie dans app2 donc vous êtes redirigé vers le sauth mais étant déja connecté sur le sauth vous êtes redirigé sur l'app
 
 	A noter qu'après ces deux manip, vous pouvez aller à la page de votre profil sur le sauth pour voir les apps 
         utilisées par votre compte

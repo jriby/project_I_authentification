@@ -19,7 +19,7 @@
           
 	  <p>Bonjour <%= @user %> </p>
             <p><%= @error %></p>
-            <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><a href="/sauth/admin"> Go to admin user </a><% end %>
+            <% if @user == "admin" %><p>Vous êtes le grand maître du sauth </p><% end %>
             <p></p>
             <% params['login'] = @user %>
             <a href="/users/<%= params['login']%>"> Allez a votre profil </a>
